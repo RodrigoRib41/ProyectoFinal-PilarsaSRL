@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import HeroSlider from "@/components/cliente/paginaHome/heroSliderUno";
+import VideoSection from "@/components/cliente/paginaHome/videoSection";
+import ModelosSection from "@/components/cliente/paginaHome/modelosSection";
+import PilarsaOfrece from "@/components/cliente/paginaHome/pilarsaOfrece";
+
 
 export default function Home() {
   return (
     <div>
-      <p> Pagina Cliente </p>
-      <Button>Este es el boton</Button>
+      <HeroSlider />
+      <VideoSection />
+      <ModelosSection />
+      <PilarsaOfrece />
     </div>
   );
 }
