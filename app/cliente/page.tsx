@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import HeroSlider from "@/components/cliente/paginaHome/heroSliderUno";
 import VideoSection from "@/components/cliente/paginaHome/videoSection";
 import ModelosSection from "@/components/cliente/paginaHome/modelosSection";

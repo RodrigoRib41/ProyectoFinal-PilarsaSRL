@@ -10,8 +10,8 @@ const modelos = [
   { nombre: "BJ30", img: "/modelosAgua/abj30.png", link: "/modelos/bj30" },
   { nombre: "X55 Plus", img: "/modelosAgua/ax55plus.webp", link: "/modelos/x55plus" },
   { nombre: "U5 Plus", img: "/modelosAgua/aguau5plus.png", link: "/modelos/u5plus" },
-  { nombre: "X55 II", img: "/modelosAgua/aguax55II.png", link: "/modelos/x55ii" },
-  { nombre: "X35", img: "/modelosAgua/aguax35.png", link: "/modelos/x35" },
+  { nombre: "X55 II", img: "/modelosAgua/aguax55II.png", link: "/cliente/modelo/baicX55II" },
+  { nombre: "X35", img: "/modelosAgua/aguax35.png", link: "/cliente/modelo/baicX35" },
   { nombre: "EU5", img: "/modelosAgua/aguaeu5.png", link: "/modelos/eu5" },
 ];
 
