@@ -1,11 +1,8 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-
-export default function Home() {
+// /app/admin/page.tsx
+export default function AdminPage() {
   return (
-    <div>
-      <p> Pagina Admin </p>
-      <Button>Este es el boton</Button>
+    <div className="flex h-screen items-center justify-center bg-gray-100">
+      <h1 className="text-3xl font-bold">Página de Administrador - Acceso Protegido</h1>
     </div>
   );
 }
