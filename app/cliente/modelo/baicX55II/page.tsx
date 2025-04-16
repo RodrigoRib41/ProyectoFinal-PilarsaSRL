@@ -7,7 +7,7 @@ import X55section6 from "@/components/cliente/baicX55/x55seccion6"
 import X55section7 from "@/components/cliente/baicX55/x55seccion7"
 
 
-export default function BaicX35Hero() {
+export default function BaicX55IIHero() {
   return (
     <div>
           <X55section1 />
