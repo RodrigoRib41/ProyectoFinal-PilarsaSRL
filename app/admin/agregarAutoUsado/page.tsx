@@ -84,11 +84,58 @@ export default function AgregarAuto() {
     setPreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('Datos listos para enviar al backend:', formData);
-    // Acá iría la lógica para subir a Cloudinary y guardar con Prisma
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append('marca', formData.marca);
+    formDataToSend.append('modelo', formData.modelo);
+    formDataToSend.append('version', formData.version);
+    formDataToSend.append('año', String(formData.año));
+    formDataToSend.append('precio', String(formData.precio));
+    formDataToSend.append('moneda', formData.moneda);
+    formDataToSend.append('kilometros', String(formData.kilometros));
+    formDataToSend.append('color', formData.color);
+    formDataToSend.append('categoria', formData.categoria);
+    formDataToSend.append('descripcion', formData.descripcion);
+  
+    formData.fotos.forEach((file, i) => {
+      formDataToSend.append(`fotos`, file, `foto${i + 1}.${file.type.split('/')[1]}`);
+    });    
+  
+    try {
+      const res = await fetch('/api/autos', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+  
+      if (!res.ok) throw new Error('Error al enviar el formulario');
+  
+      const data = await res.json();
+      console.log('Auto guardado:', data);
+  
+      // Podés redirigir o resetear el form
+      alert('Auto guardado con éxito');
+      setFormData({
+        marca: '',
+        modelo: '',
+        version: '',
+        año: '',
+        precio: '',
+        moneda: '$',
+        kilometros: '',
+        color: '',
+        categoria: 'Usado',
+        descripcion: '',
+        fotos: [],
+      });
+      setPreviewUrls([]);
+    } catch (error) {
+      console.error(error);
+      alert('Hubo un error al guardar el auto');
+    }
   };
+  
 
   return (
     <div>
