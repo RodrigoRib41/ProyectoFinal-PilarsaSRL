@@ -61,7 +61,7 @@ export default function BaicX35Hero() {
       <div className="flex justify-center w-full">
         <Image
           src={imagenes[color]}
-          alt={`BAIC X35 color ${color}`}
+          alt={`BAIC X55 color ${color}`}
           width={800}
           height={500}
           className={clsx(

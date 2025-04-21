@@ -64,7 +64,7 @@ export default function BaicX35Hero() {
           width={700}
           height={400}
           className={clsx(
-            "w-full max-w-[400px] md:max-w-[1000px] h-auto transition-opacity duration-500",
+            "w-full max-w-[400px] md:max-w-[700px] lg:w-[850px] sm:w-[500px] h-auto transition-opacity duration-500",
             isFading ? "opacity-0" : "opacity-100"
           )}
         />
