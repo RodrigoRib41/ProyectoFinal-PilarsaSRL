@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
+import axios from 'axios';
 
 interface Auto {
   id: number;
@@ -11,34 +12,43 @@ interface Auto {
 }
 
 export default function EliminarAuto() {
-  // Esto simula la lista de autos que tendrías desde la DB
-  const autosDeEjemplo: Auto[] = [
-    { id: 1, marca: 'Toyota', modelo: 'Corolla', año: 2018, kilometros: 85000 },
-    { id: 2, marca: 'Ford', modelo: 'Focus', año: 2016,kilometros: 115000 },
-    { id: 3, marca: 'Toyota', modelo: 'Hilux', año: 2020, kilometros: 150000 },
-    { id: 4, marca: 'Chevrolet', modelo: 'Onix', año: 2019, kilometros: 15000 },
-  ];
-
   const [busqueda, setBusqueda] = useState('');
+  const [autos, setAutos] = useState<Auto[]>([]);
   const [autosFiltrados, setAutosFiltrados] = useState<Auto[]>([]);
   const [autoSeleccionado, setAutoSeleccionado] = useState<Auto | null>(null);
 
+  // 🔹 Cargar autos desde la API al inicio
+  useEffect(() => {
+    axios.get('/api/autos')
+      .then(res => setAutos(res.data))
+      .catch(err => console.error('Error cargando autos:', err));
+  }, []);
+
   const handleBuscar = () => {
-    const resultado = autosDeEjemplo.filter(auto =>
+    const resultado = autos.filter(auto =>
       auto.marca.toLowerCase().includes(busqueda.toLowerCase())
     );
     setAutosFiltrados(resultado);
     setAutoSeleccionado(null);
   };
 
-  const handleEliminar = (e: FormEvent) => {
+  const handleEliminar = async (e: FormEvent) => {
     e.preventDefault();
-    if (autoSeleccionado) {
-      console.log('Auto eliminado:', autoSeleccionado);
-      // Acá iría el DELETE al backend
-      setAutoSeleccionado(null);
+    if (!autoSeleccionado) return;
+
+    try {
+      await axios.delete(`/api/autos/${autoSeleccionado.id}`);
+      alert('Auto eliminado correctamente');
+
+      // 🔄 Refrescar autos
+      const res = await axios.get('/api/autos');
+      setAutos(res.data);
       setBusqueda('');
       setAutosFiltrados([]);
+      setAutoSeleccionado(null);
+    } catch (err) {
+      console.error('Error eliminando auto:', err);
+      alert('Ocurrió un error al eliminar el auto');
     }
   };
 
@@ -71,7 +81,7 @@ export default function EliminarAuto() {
                 }`}
                 onClick={() => setAutoSeleccionado(auto)}
               >
-                {auto.marca} {auto.modelo} ({auto.año}) ({auto.kilometros})
+                {auto.marca} {auto.modelo} ({auto.año}) ({auto.kilometros} km)
               </li>
             ))}
           </ul>
@@ -87,7 +97,7 @@ export default function EliminarAuto() {
             <strong>Marca:</strong> {autoSeleccionado.marca} <br />
             <strong>Modelo:</strong> {autoSeleccionado.modelo} <br />
             <strong>Año:</strong> {autoSeleccionado.año}<br />
-            <strong>Kilometros:</strong> {autoSeleccionado.kilometros}
+            <strong>Kilómetros:</strong> {autoSeleccionado.kilometros}
           </p>
           <button
             type="submit"
