@@ -33,6 +33,7 @@ export default function AgregarAuto() {
 
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false); // ✅ toast state
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -86,7 +87,7 @@ export default function AgregarAuto() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
+
     const formDataToSend = new FormData();
     formDataToSend.append('marca', formData.marca);
     formDataToSend.append('modelo', formData.modelo);
@@ -98,24 +99,25 @@ export default function AgregarAuto() {
     formDataToSend.append('color', formData.color);
     formDataToSend.append('categoria', formData.categoria);
     formDataToSend.append('descripcion', formData.descripcion);
-  
+
     formData.fotos.forEach((file, i) => {
       formDataToSend.append(`fotos`, file, `foto${i + 1}.${file.type.split('/')[1]}`);
-    });    
-  
+    });
+
     try {
       const res = await fetch('/api/autos', {
         method: 'POST',
         body: formDataToSend,
       });
-  
+
       if (!res.ok) throw new Error('Error al enviar el formulario');
-  
+
       const data = await res.json();
       console.log('Auto guardado:', data);
-  
-      // Podés redirigir o resetear el form
-      alert('Auto guardado con éxito');
+
+      setShowSuccess(true); // ✅ mostrar cartel
+      setTimeout(() => setShowSuccess(false), 3000); // ✅ ocultar después de 3s
+
       setFormData({
         marca: '',
         modelo: '',
@@ -135,7 +137,6 @@ export default function AgregarAuto() {
       alert('Hubo un error al guardar el auto');
     }
   };
-  
 
   return (
     <div>
@@ -212,6 +213,13 @@ export default function AgregarAuto() {
           Guardar Auto
         </button>
       </form>
+
+      {/* ✅ Toast de éxito */}
+      {showSuccess && (
+        <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+          Auto guardado con éxito
+        </div>
+      )}
     </div>
   );
 }

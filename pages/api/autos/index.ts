@@ -1,5 +1,3 @@
-// pages/api/autos/index.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '@/lib/db'; // Asegúrate de que esté bien configurado
 import { v2 as cloudinary } from 'cloudinary';
@@ -69,9 +67,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(500).json({ error: 'Error al guardar el auto' });
       }
     });
-  } else {
-    return res.status(405).json({ error: 'Método no permitido' });
   }
+
+  return res.status(405).json({ error: 'Método no permitido' });
 };
 
 export default handler;
