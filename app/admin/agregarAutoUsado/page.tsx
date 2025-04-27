@@ -1,6 +1,9 @@
 'use client';
-
 import { useState, ChangeEvent, FormEvent, DragEvent } from 'react';
+import Image from 'next/image';
+import { useRef } from 'react';
+
+
 
 interface AutoFormData {
   marca: string;
@@ -13,7 +16,10 @@ interface AutoFormData {
   color: string;
   categoria: 'Usado' | '0km';
   descripcion: string;
-  fotos: File[];
+  foto1: File | null;
+  foto2: File | null;
+  foto3: File | null;
+  foto4: File | null;
 }
 
 export default function AgregarAuto() {
@@ -28,12 +34,19 @@ export default function AgregarAuto() {
     color: '',
     categoria: 'Usado',
     descripcion: '',
-    fotos: [],
+    foto1: null,
+    foto2: null,
+    foto3: null,
+    foto4: null,
   });
 
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([null, null, null, null]);
   const [dragActive, setDragActive] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false); // ✅ toast state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);  // Estado para mostrar el mensaje de error
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -45,16 +58,39 @@ export default function AgregarAuto() {
 
   const handleImageDrop = (files: FileList | null) => {
     if (!files) return;
-
-    const existingCount = formData.fotos.length;
-    const selectedFiles = Array.from(files).slice(0, 4 - existingCount);
-
-    const updatedFotos = [...formData.fotos, ...selectedFiles];
-    const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
-
-    setFormData(prev => ({ ...prev, fotos: updatedFotos }));
-    setPreviewUrls(prev => [...prev, ...newPreviews]);
+  
+    // Crear un array con las ranuras disponibles
+    const availableSlots = [formData.foto1, formData.foto2, formData.foto3, formData.foto4]
+      .map((foto, index) => (foto === null ? index : null)) // Si la imagen es nula, marcar ese índice como disponible
+      .filter((slot): slot is number => slot !== null);
+  
+    // Asegurarse de que no excedemos las ranuras disponibles
+    const selectedFiles = Array.from(files).slice(0, availableSlots.length);
+  
+    const updatedPreviews: string[] = [];
+    const newData = { ...formData };
+  
+    // Asignar las nuevas imágenes a las ranuras disponibles
+    selectedFiles.forEach((file, idx) => {
+      const slot = availableSlots[idx];
+      if (slot !== undefined) {
+        newData[`foto${slot + 1}` as 'foto1' | 'foto2' | 'foto3' | 'foto4'] = file;
+        updatedPreviews.push(URL.createObjectURL(file));
+      }
+    });
+  
+    setFormData(newData);
+    setPreviewUrls(prev => {
+      const newPreviewsArray = [...prev];
+      updatedPreviews.forEach((url, idx) => {
+        const slot = availableSlots[idx];
+        if (slot !== undefined) newPreviewsArray[slot] = url;
+      });
+      return newPreviewsArray;
+    });
   };
+  
+  
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleImageDrop(e.target.files);
@@ -78,12 +114,20 @@ export default function AgregarAuto() {
   };
 
   const handleRemoveImage = (index: number) => {
+    // Limpiar la imagen en formData
     setFormData(prev => ({
       ...prev,
-      fotos: prev.fotos.filter((_, i) => i !== index),
+      [`foto${index + 1}`]: null,
     }));
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+  
+    // Limpiar la URL previa de la imagen eliminada
+    setPreviewUrls(prev => {
+      const newPreviews = [...prev];
+      newPreviews[index] = null;
+      return newPreviews;
+    });
   };
+  
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -100,8 +144,11 @@ export default function AgregarAuto() {
     formDataToSend.append('categoria', formData.categoria);
     formDataToSend.append('descripcion', formData.descripcion);
 
-    formData.fotos.forEach((file, i) => {
-      formDataToSend.append(`fotos`, file, `foto${i + 1}.${file.type.split('/')[1]}`);
+    (['foto1', 'foto2', 'foto3', 'foto4'] as const).forEach((fotoKey, idx) => {
+      const foto = formData[fotoKey];
+      if (foto) {
+        formDataToSend.append(fotoKey, foto, `foto${idx + 1}.${foto.type.split('/')[1]}`);
+      }
     });
 
     try {
@@ -115,8 +162,7 @@ export default function AgregarAuto() {
       const data = await res.json();
       console.log('Auto guardado:', data);
 
-      setShowSuccess(true); // ✅ mostrar cartel
-      setTimeout(() => setShowSuccess(false), 3000); // ✅ ocultar después de 3s
+      setShowSuccess(true);
 
       setFormData({
         marca: '',
@@ -129,12 +175,15 @@ export default function AgregarAuto() {
         color: '',
         categoria: 'Usado',
         descripcion: '',
-        fotos: [],
+        foto1: null,
+        foto2: null,
+        foto3: null,
+        foto4: null,
       });
-      setPreviewUrls([]);
+      setPreviewUrls([null, null, null, null]);
     } catch (error) {
       console.error(error);
-      alert('Hubo un error al guardar el auto');
+      setShowError(true);  
     }
   };
 
@@ -147,6 +196,16 @@ export default function AgregarAuto() {
           <input name="modelo" placeholder="Modelo" value={formData.modelo} onChange={handleChange} className="border p-2 rounded w-full" required />
           <input name="version" placeholder="Versión" value={formData.version} onChange={handleChange} className="border p-2 rounded w-full" />
           <input name="año" type="number" placeholder="Año" value={formData.año} onChange={handleChange} className="border p-2 rounded w-full" required />
+          <input
+  id="fotos"
+  type="file"
+  name="fotos"
+  multiple
+  accept="image/*"
+  onChange={handleFileChange}
+  className="hidden"
+  ref={inputRef} // 👈 Aca
+/>
 
           <div className="flex gap-2">
             <select name="moneda" value={formData.moneda} onChange={handleChange} className="border p-2 rounded">
@@ -174,52 +233,84 @@ export default function AgregarAuto() {
           required
         />
 
-        {/* Drag & Drop zona */}
-        <div>
-          <label
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            htmlFor="fotos"
-            className={`border-2 border-dashed p-6 rounded cursor-pointer text-center ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
-          >
-            <p className="mb-2">Arrastrá hasta 4 fotos</p>
-            <span className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Seleccionar fotos</span>
-            <input id="fotos" type="file" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
-          </label>
+    
+<div>
+  <label
+    onDragEnter={handleDrag}
+    onDragLeave={handleDrag}
+    onDragOver={handleDrag}
+    onDrop={handleDrop}
+    htmlFor="fotos"
+    className={`border-4 p-6 rounded-2xl cursor-pointer text-center transition-all w-full ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}`}
+    style={{ display: 'block' }} 
+  >
+    
+    <p className="mb-2">Arrastra hasta 4 imágenes aquí o haz clic para seleccionar</p>
+    <input id="fotos" type="file" name="fotos" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
+  </label>
 
-          {/* Previews */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {previewUrls.map((url, idx) => (
-              <div key={idx} className="relative">
-                <img src={url} alt={`preview-${idx}`} className="h-32 object-cover rounded w-full" />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx)}
-                  className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs hover:bg-red-700"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+  {/* Previsualización */}
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+    {previewUrls.length > 0 ? (
+      previewUrls.map((url, index) => (
+        url && (
+          <div key={index} className="relative">
+            <Image
+              src={url}
+              alt={`Foto ${index + 1}`}
+              width={300}
+              height={200}
+              unoptimized
+              className="object-cover rounded w-full h-32"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveImage(index)}
+              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-sm"
+            >
+              X
+            </button>
+          </div>
+        )
+      ))
+    ) : (
+      <div className="col-span-4 text-gray-400 text-center">Todavía no subiste imágenes</div>
+    )}
+  </div>
+</div>
+
+ {/* Modal de éxito */}
+ {showSuccess && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+          <p className="text-black font-bold">¡Vehiculo agregado con éxito!</p>
+          <div className="flex justify-center mt-4">
+
+            <button onClick={() => setShowSuccess(false)} className="bg-green-500 text-white p-2 rounded mt-4">
+              Aceptar
+            </button>
+            </div>
           </div>
         </div>
+      )}
 
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-        >
-          Guardar Auto
-        </button>
-      </form>
-
-      {/* ✅ Toast de éxito */}
-      {showSuccess && (
-        <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
-          Auto guardado con éxito
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">Hubo un error al agregar el vehiculo</p>
+            <div className="flex justify-center mt-4">
+            <button onClick={() => setShowError(false)} className="bg-red-500 text-white p-2 rounded mt-4">
+              Aceptar
+            </button>
+            </div>
+          </div>
         </div>
       )}
+
+        <button type="submit" className="bg-blue-500 text-white p-3 rounded w-full">Guardar Auto</button>
+      </form>
     </div>
+    
   );
 }

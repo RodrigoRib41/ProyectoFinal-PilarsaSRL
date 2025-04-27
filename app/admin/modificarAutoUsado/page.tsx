@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect, ChangeEvent, FormEvent, DragEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 
 interface Auto {
-  id: string;
+  id: number;
   marca: string;
   modelo: string;
   version: string;
@@ -13,7 +13,10 @@ interface Auto {
   color: string;
   categoria: 'Usado' | '0km';
   descripcion: string;
-  fotos: string[];
+  foto1?: string;
+  foto2?: string;
+  foto3?: string;
+  foto4?: string;
 }
 
 interface SearchFilters {
@@ -21,52 +24,43 @@ interface SearchFilters {
   año: string;
 }
 
-type AutoFormData = Omit<Auto, "fotos"> & {
-  año: number | null;   // Año puede ser null si no se ha proporcionado
-  precio: number | null; // Precio puede ser null si no se ha proporcionado
-  kilometros: number | null; // Kilómetros puede ser null si no se ha proporcionado
-  fotos: File[];  // Arreglo de fotos
-  id: string;  // Id del auto
-};
-
+type FotoFields = (File | string | null)[];
 
 export default function ModificarAuto() {
-  const [autos, setAutos] = useState<Auto[]>([]); // Autos cargados
-  const [filteredAutos, setFilteredAutos] = useState<Auto[]>([]); // Autos filtrados
-  const [formData, setFormData] = useState<AutoFormData>({
-    id: '',  // El ID siempre debe estar presente
-    marca: '',
-    modelo: '',
-    version: '',
-    año: 0,  // Inicializa como un número
-    precio: 0,  // Inicializa como un número
-    moneda: '$',
-    kilometros: 0,  // Inicializa como un número
-    color: '',
-    categoria: 'Usado',
-    descripcion: '',
-    fotos: [],
-  });
-  
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [dragActive, setDragActive] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [autos, setAutos] = useState<Auto[]>([]);
+  const [filteredAutos, setFilteredAutos] = useState<Auto[]>([]);
+  const [formData, setFormData] = useState<Omit<Auto, 'foto1' | 'foto2' | 'foto3' | 'foto4'>>(defaultFormData());
+  const [fotos, setFotos] = useState<FotoFields>([null, null, null, null]); // Foto1, foto2, foto3, foto4
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({ marca: '', año: '' });
   const [marcas, setMarcas] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]); // URLs que vienen del backend
-  const [addedImages, setAddedImages] = useState<File[]>([]); // Imágenes agregadas
-  const [removedImages, setRemovedImages] = useState<string[]>([]); // Imágenes eliminadas
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
+
+  function defaultFormData() {
+    return {
+      id: 0,
+      marca: '',
+      modelo: '',
+      version: '',
+      año: 0,
+      precio: 0,
+      moneda: '$',
+      kilometros: 0,
+      color: '',
+      categoria: 'Usado',
+      descripcion: '',
+    };
+  }
 
   useEffect(() => {
     const fetchAutos = async () => {
       try {
         const res = await fetch('/api/autos');
-        if (!res.ok) throw new Error('Error al cargar autos');
         const data: Auto[] = await res.json();
         setAutos(data);
         setFilteredAutos(data);
-        setMarcas([...new Set(data.map((auto) => auto.marca))]);
+        setMarcas([...new Set(data.map(a => a.marca))]);
       } catch (err) {
         console.error(err);
         alert('Error al obtener autos');
@@ -77,7 +71,7 @@ export default function ModificarAuto() {
 
   useEffect(() => {
     setFilteredAutos(
-      autos.filter((auto) =>
+      autos.filter(auto =>
         (!searchFilters.marca || auto.marca.toLowerCase().includes(searchFilters.marca.toLowerCase())) &&
         (!searchFilters.año || auto.año === +searchFilters.año)
       )
@@ -86,141 +80,94 @@ export default function ModificarAuto() {
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setSearchFilters((prev) => ({ ...prev, [name]: value }));
+    setSearchFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAutoSelect = (id: string) => {
-    const selected = autos.find((a) => a.id === id);
+  const handleAutoSelect = (id: number) => {
+    const selected = autos.find(a => a.id === id);
     if (selected) {
       setFormData({
-        id: selected.id || '',  // Asegura que el ID siempre esté presente
-        marca: selected.marca || '',
-        modelo: selected.modelo || '',
-        version: selected.version || '',
-        año: selected.año || 0,  // Si no hay valor, asigna 0
-        precio: selected.precio || 0,  // Si no hay valor, asigna 0
-        moneda: selected.moneda || '$',  // Si no hay valor, asigna '$'
-        kilometros: selected.kilometros || 0,  // Si no hay valor, asigna 0
-        color: selected.color || '',
-        categoria: selected.categoria || 'Usado',  // Asigna valor por defecto
-        descripcion: selected.descripcion || '',
-        fotos: [],  // Si no hay fotos, asigna un array vacío
+        id: selected.id,
+        marca: selected.marca,
+        modelo: selected.modelo,
+        version: selected.version,
+        año: selected.año,
+        precio: selected.precio,
+        moneda: selected.moneda,
+        kilometros: selected.kilometros,
+        color: selected.color,
+        categoria: selected.categoria,
+        descripcion: selected.descripcion,
       });
-      setPreviewUrls(selected.fotos || []);
+
+      setFotos([
+        selected.foto1 || null,
+        selected.foto2 || null,
+        selected.foto3 || null,
+        selected.foto4 || null,
+      ]);
     }
   };
-  
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: ['año', 'precio', 'kilometros'].includes(name) ? (value === '' ? 0 : +value) : value,
+      [name]: ['año', 'precio', 'kilometros'].includes(name) ? +value : value,
     }));
-  };  
-
-  const handleImageDrop = (files: FileList | null) => {
-    if (!files) return;
-  
-    const filesArray = Array.from(files);
-    const currentCount = existingImages.filter((img) => !removedImages.includes(img)).length + addedImages.length;
-    const spaceLeft = 4 - currentCount;
-  
-    if (spaceLeft <= 0) return;
-  
-    const selected = filesArray.slice(0, spaceLeft);
-    setAddedImages((prev) => [...prev, ...selected]);
-    setPreviewUrls((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
-  };
-  
-  
-  
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleImageDrop(e.target.files);
   };
 
-  const handleDrag = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setDragActive(e.type === 'dragenter' || e.type === 'dragover');
+  const handleFotoChange = (index: number, file: File) => {
+    setFotos(prev => {
+      const newFotos = [...prev];
+      newFotos[index] = file;
+      return newFotos;
+    });
   };
 
-  const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-    handleImageDrop(e.dataTransfer.files);
+  const handleRemoveFoto = (index: number) => {
+    setFotos(prev => {
+      const newFotos = [...prev];
+      newFotos[index] = null;
+      return newFotos;
+    });
   };
-
-  const handleRemoveImage = (i: number) => {
-  const imageUrl = previewUrls[i];
-
-  const isExisting = existingImages.includes(imageUrl);
-  if (isExisting) {
-    setRemovedImages((prev) => [...prev, imageUrl]);
-  } else {
-    // Es una imagen agregada en esta sesión
-    const newAddedImages = [...addedImages];
-    newAddedImages.splice(i - existingImages.filter(img => !removedImages.includes(img)).length, 1);
-    setAddedImages(newAddedImages);
-  }
-
-  setPreviewUrls((prev) => prev.filter((_, idx) => idx !== i));
-};
-
-  
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
+
     const formDataToSend = new FormData();
 
-    // Añadir todos los campos del formulario al FormData
-    formDataToSend.append('marca', formData.marca);
-    formDataToSend.append('modelo', formData.modelo);
-    formDataToSend.append('version', formData.version);
-    formDataToSend.append('año', String(formData.año)); // Asegúrate de convertir el número en string
-    formDataToSend.append('precio', String(formData.precio)); // Convertir el número en string
-    formDataToSend.append('moneda', formData.moneda);
-    formDataToSend.append('kilometros', String(formData.kilometros));
-    formDataToSend.append('color', formData.color);
-    formDataToSend.append('categoria', formData.categoria);
-    formDataToSend.append('descripcion', formData.descripcion);
-
-    
-    // Añadir las fotos si existen
-    // Añadir las fotos nuevas
-    // Adjuntar imágenes nuevas
-    addedImages.forEach((file, i) => {
-      formDataToSend.append('fotos', file, `foto${i + 1}.${file.type.split('/')[1]}`);
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, String(value));
     });
 
-    // Adjuntar imágenes eliminadas (referencia por URL o nombre)
-    removedImages.forEach((url) => {
-      formDataToSend.append('removedImages', url);
+    fotos.forEach((foto, idx) => {
+      const key = `foto${idx + 1}`;
+      if (foto instanceof File) {
+        formDataToSend.append(key, foto);
+      } else if (typeof foto === 'string') {
+        formDataToSend.append(key, foto);
+      } else {
+        formDataToSend.append(key, ''); // Si se eliminó la foto
+      }
     });
-
-    console.log('Form Data to Send:', formDataToSend);
 
     try {
-      // Aquí va la solicitud PUT al backend con todos los campos
-      
       const res = await fetch(`/api/autos/${formData.id}`, {
         method: 'PUT',
-        headers: {
-    'Cache-Control': 'no-cache', // Desactiva caché
-  },
-      body: formDataToSend,
+        body: formDataToSend,
       });
+
       if (!res.ok) throw new Error('Error al actualizar');
-  
-      // Mostrar mensaje de éxito
+
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       console.error(err);
       alert('Error al actualizar el auto');
+      setShowError(true);
     }
   };
-  
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -232,7 +179,7 @@ export default function ModificarAuto() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <select name="marca" value={searchFilters.marca} onChange={handleSearchChange} className="border p-2 rounded">
             <option value="">Marca</option>
-            {marcas.map((m) => <option key={m} value={m}>{m}</option>)}
+            {marcas.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
           <select name="año" value={searchFilters.año} onChange={handleSearchChange} className="border p-2 rounded">
             <option value="">Año</option>
@@ -248,7 +195,7 @@ export default function ModificarAuto() {
       <section className="mb-6 bg-gray-50 p-4 rounded shadow-sm">
         <h2 className="font-semibold mb-2">Resultados</h2>
         <div className="space-y-2">
-          {filteredAutos.map((auto) => (
+          {filteredAutos.map(auto => (
             <button
               key={auto.id}
               onClick={() => handleAutoSelect(auto.id)}
@@ -267,128 +214,112 @@ export default function ModificarAuto() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Campos de texto */}
-            {[{ name: 'marca', label: 'Marca' }, { name: 'modelo', label: 'Modelo' }, { name: 'version', label: 'Versión' }, { name: 'color', label: 'Color' }].map(({ name, label }) => (
+            {['marca', 'modelo', 'version', 'color'].map(name => (
               <div key={name} className="flex flex-col">
-                <label htmlFor={name} className="font-medium text-sm mb-1">{label}</label>
+                <label htmlFor={name} className="font-medium text-sm mb-1">{name.charAt(0).toUpperCase() + name.slice(1)}</label>
                 <input
                   id={name}
                   name={name}
-                  value={formData[name as keyof AutoFormData]}
-
+                  value={(formData as any)[name]}
                   onChange={handleChange}
                   className="border p-2 rounded"
-                  placeholder={label}
+                  placeholder={name}
                 />
               </div>
             ))}
-
-            {/* Año */}
             <div className="flex flex-col">
               <label htmlFor="año" className="font-medium text-sm mb-1">Año</label>
-              <input
-                id="año"
-                name="año"
-                value={formData.año}
-                onChange={handleChange}
-                type="number"
-                className="border p-2 rounded"
-              />
+              <input id="año" name="año" value={formData.año} onChange={handleChange} type="number" className="border p-2 rounded" />
             </div>
-
-            {/* Precio */}
             <div className="flex flex-col">
               <label htmlFor="precio" className="font-medium text-sm mb-1">Precio</label>
-              <input
-                id="precio"
-                name="precio"
-                value={formData.precio}
-                onChange={handleChange}
-                type="number"
-                className="border p-2 rounded"
-              />
+              <input id="precio" name="precio" value={formData.precio} onChange={handleChange} type="number" className="border p-2 rounded" />
             </div>
-
-            {/* Kilómetros */}
             <div className="flex flex-col">
               <label htmlFor="kilometros" className="font-medium text-sm mb-1">Kilómetros</label>
-              <input
-                id="kilometros"
-                name="kilometros"
-                value={formData.kilometros}
-                onChange={handleChange}
-                type="number"
-                className="border p-2 rounded"
-              />
-            </div>
-
-            {/* Descripción */}
-            <div className="flex flex-col col-span-2">
-              <label htmlFor="descripcion" className="font-medium text-sm mb-1">Descripción</label>
-              <textarea
-                id="descripcion"
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleChange}
-                rows={4}
-                className="border p-2 rounded"
-                placeholder="Descripción del auto"
-              />
+              <input id="kilometros" name="kilometros" value={formData.kilometros} onChange={handleChange} type="number" className="border p-2 rounded" />
             </div>
           </div>
 
+          {/* Descripción */}
+          <div className="flex flex-col col-span-2">
+            <label htmlFor="descripcion" className="font-medium text-sm mb-1">Descripción</label>
+            <textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} className="border p-2 rounded" />
+          </div>
+
           {/* Fotos */}
-          <div>
-            <label
-              htmlFor="file-upload"
-              className="block text-center p-2 border rounded cursor-pointer"
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              {dragActive ? 'Suelta las fotos aquí' : 'Arrastra y suelta las fotos o haz clic para subir'}
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-            <div className="mt-4 flex flex-wrap gap-4">
-              {previewUrls.map((url, index) => (
-                <div key={index} className="relative">
-                  <img src={url} alt={`foto-${index}`} className="w-32 h-32 object-cover rounded" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="absolute top-0 right-0 bg-white p-1 rounded-full"
-                  >
-                    &times;
-                  </button>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Fotos</h3>
+            <div className="flex gap-4 flex-wrap">
+              {fotos.map((foto, index) => (
+                <div key={index} className="relative w-32 h-32 border rounded flex items-center justify-center">
+                  {foto ? (
+                    <>
+                      <img
+                        src={foto instanceof File ? URL.createObjectURL(foto) : foto}
+                        alt={`foto-${index}`}
+                        className="object-cover w-full h-full rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFoto(index)}
+                        className="absolute top-0 right-0 bg-white rounded-full p-1"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  ) : (
+                    <label className="cursor-pointer">
+                      <span className="text-sm text-gray-400">Subir</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files && handleFotoChange(index, e.target.files[0])}
+                      />
+                    </label>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Botón de envío */}
+          {/* Submit */}
           <div className="mt-4">
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-            >
+            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
               Actualizar Auto
             </button>
           </div>
-        </form>
+
+          {/* Modal de éxito */}
+ {showSuccess && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+          <p className="text-black font-bold">¡Vehiculo modificado con éxito!</p>
+          <div className="flex justify-center mt-4">
+
+            <button onClick={() => setShowSuccess(false)} className="bg-green-500 text-white p-2 rounded mt-4">
+              Aceptar
+            </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Mensaje de éxito */}
-      {showSuccess && (
-        <div className="mt-4 text-center text-green-600">
-          <p>¡Auto actualizado con éxito!</p>
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">Hubo un error al modificar el vehiculo</p>
+            <div className="flex justify-center mt-4">
+            <button onClick={() => setShowError(false)} className="bg-red-500 text-white p-2 rounded mt-4">
+              Aceptar
+            </button>
+            </div>
+          </div>
         </div>
+      )}
+        </form>
       )}
     </div>
   );

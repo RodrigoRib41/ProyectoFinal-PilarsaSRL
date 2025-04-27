@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/db'; // Asegúrate de que esté bien configurado
+import { db } from '@/lib/db';
 import { v2 as cloudinary } from 'cloudinary';
 import formidable, { File } from 'formidable';
 
@@ -31,19 +31,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
+        console.error(err);
         return res.status(500).json({ error: 'Error al procesar el formulario' });
       }
 
       try {
-        const fotos = Array.isArray(files.fotos) ? files.fotos : [files.fotos];
+        // 👉 Ahora buscamos foto1, foto2, foto3, foto4
+        const fotoKeys = ['foto1', 'foto2', 'foto3', 'foto4'];
+        const fotosArray: File[] = [];
+
+        for (const key of fotoKeys) {
+          const file = files[key];
+          if (file) {
+            if (Array.isArray(file)) {
+              fotosArray.push(...file);
+            } else {
+              fotosArray.push(file);
+            }
+          }
+        }
+
+
         const uploadedUrls: string[] = [];
 
-        for (const foto of fotos) {
-          const file = foto as File;
-          const result = await cloudinary.uploader.upload(file.filepath, {
+        for (const foto of fotosArray) {
+          const uploadResult = await cloudinary.uploader.upload(foto.filepath, {
             folder: 'autos',
           });
-          uploadedUrls.push(result.secure_url);
+          uploadedUrls.push(uploadResult.secure_url);
         }
 
         const nuevoAuto = await db.auto.create({
@@ -51,22 +66,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             marca: String(fields.marca),
             modelo: String(fields.modelo),
             version: fields.version ? String(fields.version) : '',
-            año: Number(fields.año),
-            precio: Number(fields.precio),
+            año: fields.año ? Number(fields.año) : 0,
+            precio: fields.precio ? Number(fields.precio) : 0,
             moneda: String(fields.moneda),
-            kilometros: Number(fields.kilometros),
+            kilometros: fields.kilometros ? Number(fields.kilometros) : 0,
             color: String(fields.color),
             categoria: String(fields.categoria),
             descripcion: String(fields.descripcion),
-            fotos: uploadedUrls,
+            foto1: uploadedUrls[0] || null,
+            foto2: uploadedUrls[1] || null,
+            foto3: uploadedUrls[2] || null,
+            foto4: uploadedUrls[3] || null,
           },
         });
 
         return res.status(200).json(nuevoAuto);
-      } catch {
+      } catch (error) {
+        console.error(error);
         return res.status(500).json({ error: 'Error al guardar el auto' });
       }
     });
+
+    return;
   }
 
   return res.status(405).json({ error: 'Método no permitido' });

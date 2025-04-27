@@ -52,7 +52,10 @@ model Auto {
   color       String
   categoria   String
   descripcion String
-  fotos       String[] // Prisma permite arrays de strings si usás PostgreSQL
+  foto1       String?  // Opcional, puede ser null si no subieron foto
+  foto2       String?
+  foto3       String?
+  foto4       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
