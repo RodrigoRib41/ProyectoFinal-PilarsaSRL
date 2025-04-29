@@ -41,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const id = Number(req.query.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
+  // PUT: Actualizar auto
   if (req.method === 'PUT') {
     const form = formidable({ multiples: true });
 
@@ -107,6 +108,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+  // DELETE: Eliminar auto por ID
+  } else if (req.method === 'DELETE') {
+    try {
+      // Buscar el auto por ID para verificar si existe
+      const auto = await db.auto.findUnique({
+        where: { id },
+      });
+
+      if (!auto) {
+        return res.status(404).json({ error: 'Auto no encontrado' });
+      }
+
+      // Eliminar el auto de la base de datos
+      await db.auto.delete({
+        where: { id },
+      });
+
+      return res.status(200).json({ message: 'Auto eliminado correctamente' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error al eliminar el auto' });
+    }
   } else {
     return res.status(405).json({ error: `Método ${req.method} no permitido` });
   }

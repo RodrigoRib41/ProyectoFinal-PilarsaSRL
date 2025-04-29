@@ -1,82 +1,234 @@
-"use client";
-import Image from "next/image";
-import { Poppins } from "next/font/google";
-import Link from "next/link";
+'use client';
 
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Poppins } from 'next/font/google';
+import axios from 'axios';
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700'] });
 
-const autosUsados = [
-  {
-    id: 1,
-    marca: "Volkswagen",
-    modelo: "T.CROSS 1.6 CONF",
-    precio: "$25.000.000",
-    imagenes: ["/usados/tcross1.jpg", "/usados/tcross2.jpg", "/usados/tcross3.jpg"]
-  },
-  {
-    id: 2,
-    marca: "Volkswagen",
-    modelo: "SURAN 1.6 HIGH",
-    precio: "$17.000.000",
-    imagenes: ["/usados/suran1.jpg", "/usados/suran2.jpg"]
-  },
-  {
-    id: 3,
-    marca: "Toyota",
-    modelo: "YARIS XLS 5P MT6",
-    precio: "$19.500.000",
-    imagenes: ["/usados/yaris-xls1.jpg", "/usados/yaris-xls2.jpg"]
-  },
-  {
-    id: 4,
-    marca: "Toyota",
-    modelo: "YARIS S 5P MT6",
-    precio: "$21.000.000",
-    imagenes: ["/usados/yaris-s1.jpg", "/usados/yaris-s2.jpg"]
-  },
-  {
-    id: 5,
-    marca: "Baic",
-    modelo: "X55 PLUS",
-    precio: "$41.000.000",
-    imagenes: ["/x55plusSLIDER.jpg", "/usados/yaris-s2.jpg"]
-  },
-  {
-    id: 6,
-    marca: "Baic",
-    modelo: "X55 II AT",
-    precio: "$41.000.000",
-    imagenes: ["/pruebaUsados/x55prueba.jpg", "/pruebaUsados/x55prueba2.jpg","/pruebaUsados/x55prueba3.jpg"]
-  }
-];
+interface Auto {
+  id: number;
+  marca: string;
+  modelo: string;
+  precio: number;
+  moneda: string;
+  año: number;
+  kilometros: number;
+  foto1?: string;
+}
 
-export default function Usados() {
+export default function AutosUsados() {
+  const [autos, setAutos] = useState<Auto[]>([]);
+  const [autosFiltrados, setAutosFiltrados] = useState<Auto[]>([]);
+  const [marcasDisponibles, setMarcasDisponibles] = useState<string[]>([]);
+  const [añosDisponibles, setAñosDisponibles] = useState<number[]>([]);
+  const [precioMin, setPrecioMin] = useState<number>(0);
+  const [precioMax, setPrecioMax] = useState<number>(0);
+  const [kmMin, setKmMin] = useState<number>(0);
+  const [kmMax, setKmMax] = useState<number>(0);
+  const [marcaSeleccionada, setMarcaSeleccionada] = useState<string>('');
+  const [añoSeleccionado, setAñoSeleccionado] = useState<number | string>('');
+  const [precioFiltro, setPrecioFiltro] = useState([0, 0]);
+  const [kmFiltro, setKmFiltro] = useState([0, 0]);
+
+  // 🔹 Cargar autos al inicio
+  useEffect(() => {
+    axios.get('/api/autos')
+      .then(res => {
+        const autosData = res.data as Auto[];
+        setAutos(autosData);
+
+        // Obtener marcas y años únicas
+        const marcas = [...new Set(autosData.map(auto => auto.marca))];
+        setMarcasDisponibles(marcas);
+
+        const años = [...new Set(autosData.map(auto => auto.año))].sort((a, b) => b - a);
+        setAñosDisponibles(años);
+
+        // Establecer los valores máximos y mínimos de precio y kilometros
+        const precios = autosData.map(auto => auto.precio);
+        const kilometros = autosData.map(auto => auto.kilometros);
+
+        setPrecioMin(Math.min(...precios));
+        setPrecioMax(Math.max(...precios));
+        setKmMin(Math.min(...kilometros));
+        setKmMax(Math.max(...kilometros));
+
+        setAutosFiltrados(autosData); // Mostrar todos al principio
+        setPrecioFiltro([Math.min(...precios), Math.max(...precios)]);
+        setKmFiltro([Math.min(...kilometros), Math.max(...kilometros)]);
+      })
+      .catch(err => console.error('Error cargando autos:', err));
+  }, []);
+
+  // 🔹 Filtrar autos cuando cambia marca, año, precio o kilometros
+  useEffect(() => {
+    let filtrados = autos;
+
+    if (marcaSeleccionada) {
+      filtrados = filtrados.filter(auto =>
+        auto.marca.toLowerCase().includes(marcaSeleccionada.toLowerCase())
+      );
+    }
+
+    if (añoSeleccionado) {
+      filtrados = filtrados.filter(auto =>
+        auto.año === (typeof añoSeleccionado === 'number' ? añoSeleccionado : parseInt(añoSeleccionado))
+      );
+    }
+
+    if (precioFiltro) {
+      filtrados = filtrados.filter(auto =>
+        auto.precio >= precioFiltro[0] && auto.precio <= precioFiltro[1]
+      );
+    }
+
+    if (kmFiltro) {
+      filtrados = filtrados.filter(auto =>
+        auto.kilometros >= kmFiltro[0] && auto.kilometros <= kmFiltro[1]
+      );
+    }
+
+    setAutosFiltrados(filtrados);
+  }, [marcaSeleccionada, añoSeleccionado, autos, precioFiltro, kmFiltro]);
+
   return (
-    <div className={`${poppins.className} container mx-auto px-4`}>
-      <h2 className="text-2xl font-bold text-center my-6">USADOS</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {autosUsados.map((auto) => (
-          <Link key={auto.id} href={`/cliente/usados/${auto.id}`} passHref>
-            <div className="border rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow">
-              {/* Imagen del auto */}
-              <div className="relative w-full aspect-square bg-gray-100">
-                <Image
-                  src={auto.imagenes[0]}
-                  alt={auto.modelo}
-                  layout="fill"
-                  objectFit="contain"
-                  className="rounded-t-lg"
-                />
+    <div className={`${poppins.className} p-6`}>
+      <h1 className="text-2xl font-bold mb-6">Autos Usados</h1>
+
+      {/* 🔹 Filtros */}
+      <div className="flex flex-wrap items-center gap-4 mb-8">
+        <h2 className="text-xl w-full md:w-auto">Filtros:</h2>
+        <div className="flex gap-4 w-full flex-wrap">
+          {/* Filtro de Marca */}
+          <select
+            value={marcaSeleccionada}
+            onChange={(e) => setMarcaSeleccionada(e.target.value)}
+            className="border p-2 rounded w-full md:w-1/4"
+          >
+            <option value="">Selecciona una marca...</option>
+            {marcasDisponibles.map((marca) => (
+              <option key={marca} value={marca}>
+                {marca}
+              </option>
+            ))}
+          </select>
+
+          {/* Filtro de Año */}
+          <select
+            value={añoSeleccionado}
+            onChange={(e) => setAñoSeleccionado(e.target.value)}
+            className="border p-2 rounded w-full md:w-1/4"
+          >
+            <option value="">Selecciona un año...</option>
+            {añosDisponibles.map((año) => (
+              <option key={año} value={año}>
+                {año}
+              </option>
+            ))}
+          </select>
+
+          {/* Filtro de Precio */}
+          <div className="w-full sm:w-32 md:w-40 lg:w-48">
+            <h3 className="text-sm">Precio</h3>
+            <input
+              type="range"
+              min={precioMin}
+              max={precioMax}
+              value={precioFiltro[0]}
+              onChange={(e) =>
+                setPrecioFiltro([parseInt(e.target.value), precioFiltro[1]])
+              }
+              className="w-full"
+            />
+            <input
+              type="range"
+              min={precioMin}
+              max={precioMax}
+              value={precioFiltro[1]}
+              onChange={(e) =>
+                setPrecioFiltro([precioFiltro[0], parseInt(e.target.value)])
+              }
+              className="w-full"
+            />
+            <p>
+              Rango de precio: {precioFiltro[0]} - {precioFiltro[1]}
+            </p>
+          </div>
+
+          {/* Filtro de Kilómetros */}
+          <div className="w-full sm:w-32 md:w-40 lg:w-48">
+            <h3 className="text-sm">Kilómetros</h3>
+            <input
+              type="range"
+              min={kmMin}
+              max={kmMax}
+              value={kmFiltro[0]}
+              onChange={(e) => {
+                const newMin = parseInt(e.target.value);
+                if (newMin <= kmFiltro[1]) {
+                  setKmFiltro([newMin, kmFiltro[1]]);
+                }
+              }}
+              className="w-full"
+            />
+            <input
+              type="range"
+              min={kmMin}
+              max={kmMax}
+              value={kmFiltro[1]}
+              onChange={(e) => {
+                const newMax = parseInt(e.target.value);
+                if (newMax >= kmFiltro[0]) {
+                  setKmFiltro([kmFiltro[0], newMax]);
+                }
+              }}
+              className="w-full"
+            />
+            <p>
+              Rango de kilómetros: {kmFiltro[0]} - {kmFiltro[1]}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 🔹 Lista de autos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-0 gap-y-4">
+      {autosFiltrados.map((auto) => (
+          <div
+            key={auto.id}
+            className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition w-[390px] mx-auto"
+            
+          >
+            {auto.foto1 ? (
+              <Image
+                src={auto.foto1}
+                alt={`${auto.marca} ${auto.modelo}`}
+                width={400}
+                height={300}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                <span>Sin imagen</span>
               </div>
-              {/* Información del auto */}
-              <div className="p-4">
-                <p className="text-lg font-bold">{auto.marca}</p>
-                <p className="text-gray-700">{auto.modelo}</p>
-                <p className="text-black font-semibold mt-2">{auto.precio}</p>
-              </div>
-            </div>
-          </Link>
+            )}
+
+            <h2 className="text-lg font-semibold">{auto.marca} {auto.modelo}</h2>
+            <p className="text-black">Año: {auto.año} &nbsp; Kilómetros: {auto.kilometros}</p>
+
+            <p className="text-black font-bold">
+              {auto.moneda} {auto.precio}
+            </p>
+            <Link
+              href={`/cliente/usados/${auto.id}`}
+              className="text-blue-600 hover:underline mt-2 inline-block"
+            >
+              Ver detalles
+            </Link>
+          </div>
         ))}
       </div>
     </div>

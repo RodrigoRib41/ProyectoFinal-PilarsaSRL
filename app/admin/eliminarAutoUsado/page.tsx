@@ -30,6 +30,10 @@ export default function EliminarAuto() {
   const [marcasDisponibles, setMarcasDisponibles] = useState<string[]>([]);
   const [añosDisponibles, setAñosDisponibles] = useState<number[]>([]);
 
+  // Modales de éxito y error
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+
   // 🔹 Cargar autos y marcas disponibles desde la API al inicio
   useEffect(() => {
     axios.get('/api/autos')
@@ -73,7 +77,7 @@ export default function EliminarAuto() {
 
     try {
       await axios.delete(`/api/autos/${autoSeleccionado.id}`);
-      alert('Auto eliminado correctamente');
+      setShowSuccess(true); // Mostrar el modal de éxito
 
       // 🔄 Refrescar autos
       const res = await axios.get('/api/autos');
@@ -84,7 +88,7 @@ export default function EliminarAuto() {
       setAutoSeleccionado(null);
     } catch (err) {
       console.error('Error eliminando auto:', err);
-      alert('Ocurrió un error al eliminar el auto');
+      setShowError(true); // Mostrar el modal de error
     }
   };
 
@@ -141,63 +145,90 @@ export default function EliminarAuto() {
         </div>
       )}
 
-{autoSeleccionado && (
-  <div className="mt-6 bg-white p-4 border rounded shadow space-y-1 max-w-[635px]">
-    <h3 className="text-xl font-semibold mb-4">Detalles del Auto</h3>
-    
-    <div className="grid grid-cols-1 gap-4">
-      {/* Primera fila: Marca, Modelo, Versión */}
-      <div className="grid grid-cols-3 gap-4">
-        <div><strong>Marca:</strong> {autoSeleccionado.marca}</div>
-        <div><strong>Modelo:</strong> {autoSeleccionado.modelo}</div>
-        <div><strong>Versión:</strong> {autoSeleccionado.version}</div>
-      </div>
+      {autoSeleccionado && (
+        <div className="mt-6 bg-white p-4 border rounded shadow space-y-4 max-w-[635px]">
+          <h3 className="text-xl font-semibold mb-4">Detalles del Auto</h3>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {/* Primera fila: Marca, Modelo, Versión */}
+            <div className="grid grid-cols-3 gap-4">
+              <div><strong>Marca:</strong> {autoSeleccionado.marca}</div>
+              <div><strong>Modelo:</strong> {autoSeleccionado.modelo}</div>
+              <div><strong>Versión:</strong> {autoSeleccionado.version}</div>
+            </div>
 
-      {/* Segunda fila: Año, Precio, Kilómetros */}
-      <div className="grid grid-cols-3 gap-4">
-        <div><strong>Año:</strong> {autoSeleccionado.año}</div>
-        <div><strong>Precio:</strong> {autoSeleccionado.precio} {autoSeleccionado.moneda}</div>
-        <div><strong>Kilómetros:</strong> {autoSeleccionado.kilometros} km</div>
-      </div>
+            {/* Segunda fila: Año, Precio, Kilómetros */}
+            <div className="grid grid-cols-3 gap-4">
+              <div><strong>Año:</strong> {autoSeleccionado.año}</div>
+              <div><strong>Precio:</strong> {autoSeleccionado.precio} {autoSeleccionado.moneda}</div>
+              <div><strong>Kilómetros:</strong> {autoSeleccionado.kilometros} km</div>
+            </div>
 
-      {/* Tercera fila: Color, Categoría, Descripción */}
-      <div className="grid grid-cols-3 gap-4">
-        <div><strong>Color:</strong> {autoSeleccionado.color}</div>
-        <div><strong>Categoría:</strong> {autoSeleccionado.categoria}</div>
-        <div><strong>Descripción:</strong> {autoSeleccionado.descripcion}</div>
-      </div>
-    </div>
+            {/* Tercera fila: Color, Categoría, Descripción */}
+            <div className="grid grid-cols-3 gap-4">
+              <div><strong>Color:</strong> {autoSeleccionado.color}</div>
+              <div><strong>Categoría:</strong> {autoSeleccionado.categoria}</div>
+              <div><strong>Descripción:</strong> {autoSeleccionado.descripcion}</div>
+            </div>
+          </div>
 
-    {/* Imágenes del auto en fila */}
-    <div className="flex flex-row space-x-2 justify-start mt-4">
-      {autoSeleccionado.foto1 && (
-        <img src={autoSeleccionado.foto1} alt="Foto 1" className="w-36 h-36 object-cover" />
+          {/* Imágenes del auto en fila */}
+          <div className="flex flex-row space-x-2 justify-start mt-4">
+            {autoSeleccionado.foto1 && (
+              <img src={autoSeleccionado.foto1} alt="Foto 1" className="w-36 h-36 object-cover" />
+            )}
+            {autoSeleccionado.foto2 && (
+              <img src={autoSeleccionado.foto2} alt="Foto 2" className="w-36 h-36 object-cover" />
+            )}
+            {autoSeleccionado.foto3 && (
+              <img src={autoSeleccionado.foto3} alt="Foto 3" className="w-36 h-36 object-cover" />
+            )}
+            {autoSeleccionado.foto4 && (
+              <img src={autoSeleccionado.foto4} alt="Foto 4" className="w-36 h-36 object-cover" />
+            )}
+          </div>
+
+          <form onSubmit={handleEliminar} className="mt-6 space-y-4">
+            <p className="text-red-600 font-semibold">
+              ¿Estás seguro de que querés eliminar el auto seleccionado?
+            </p>
+            <button
+              type="submit"
+              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
+            >
+              Eliminar Auto
+            </button>
+          </form>
+        </div>
       )}
-      {autoSeleccionado.foto2 && (
-        <img src={autoSeleccionado.foto2} alt="Foto 2" className="w-36 h-36 object-cover" />
-      )}
-      {autoSeleccionado.foto3 && (
-        <img src={autoSeleccionado.foto3} alt="Foto 3" className="w-36 h-36 object-cover" />
-      )}
-      {autoSeleccionado.foto4 && (
-        <img src={autoSeleccionado.foto4} alt="Foto 4" className="w-36 h-36 object-cover" />
-      )}
-    </div>
 
-    <form onSubmit={handleEliminar} className="mt-6 space-y-4">
-      <p className="text-red-600 font-semibold">
-        ¿Estás seguro de que querés eliminar el auto seleccionado?
-      </p>
-      <button
-        type="submit"
-        className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
-      >
-        Eliminar Auto
-      </button>
-    </form>
-  </div>
-)}
+      {/* Modal de éxito */}
+      {showSuccess && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">¡Vehiculo eliminado con éxito!</p>
+            <div className="flex justify-center mt-4">
+              <button onClick={() => setShowSuccess(false)} className="bg-green-500 text-white p-2 rounded mt-4">
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">Hubo un error al eliminar el vehiculo</p>
+            <div className="flex justify-center mt-4">
+              <button onClick={() => setShowError(false)} className="bg-red-500 text-white p-2 rounded mt-4">
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
