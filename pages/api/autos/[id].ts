@@ -41,6 +41,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const id = Number(req.query.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
+  if (req.method === 'GET') {
+    try {
+      const auto = await db.auto.findUnique({
+        where: { id },
+      });
+
+      if (!auto) {
+        return res.status(404).json({ error: 'Auto no encontrado' });
+      }
+
+      return res.status(200).json(auto);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error al obtener el auto' });
+    }
+  }
   // PUT: Actualizar auto
   if (req.method === 'PUT') {
     const form = formidable({ multiples: true });
@@ -130,7 +146,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error(error);
       return res.status(500).json({ error: 'Error al eliminar el auto' });
     }
-  } else {
+  }
+  // GET: Obtener auto por ID
+else if (req.method === 'GET') {
+  try {
+    const auto = await db.auto.findUnique({
+      where: { id },
+    });
+
+    if (!auto) {
+      return res.status(404).json({ error: 'Auto no encontrado' });
+    }
+
+    return res.status(200).json(auto);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Error al obtener el auto' });
+  }
+}
+ else {
     return res.status(405).json({ error: `Método ${req.method} no permitido` });
   }
 }
