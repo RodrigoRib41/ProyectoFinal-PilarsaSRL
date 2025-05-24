@@ -220,7 +220,9 @@ export default function ModificarAuto() {
                 <input
                   id={name}
                   name={name}
-                  value={(formData as unknown)[name]}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  value={(formData as Record<string, any>)[name]}
+
                   onChange={handleChange}
                   className="border p-2 rounded"
                   placeholder={name}
