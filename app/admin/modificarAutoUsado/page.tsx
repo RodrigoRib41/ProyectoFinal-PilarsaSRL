@@ -8,7 +8,7 @@ interface Auto {
   version: string;
   año: number;
   precio: number;
-  moneda: '$' | 'U$D';
+  moneda: string;
   kilometros: number;
   color: string;
   categoria: 'Usado' | '0km';
