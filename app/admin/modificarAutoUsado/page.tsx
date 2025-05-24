@@ -11,7 +11,7 @@ interface Auto {
   moneda: string;
   kilometros: number;
   color: string;
-  categoria: 'Usado' | '0km';
+  categoria: string;
   descripcion: string;
   foto1?: string;
   foto2?: string;
