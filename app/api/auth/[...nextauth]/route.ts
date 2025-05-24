@@ -1,9 +1,10 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+// app/api/auth/[...nextauth]/route.ts
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import bcrypt from "bcrypt";
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -16,8 +17,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Username and password are required");
         }
 
-        console.log(credentials);
-
         const userFound = await db.user.findUnique({
           where: {
             username: credentials.username,
@@ -26,10 +25,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!userFound) throw new Error("No user found");
 
-        console.log(userFound);
-
         const matchPassword = await bcrypt.compare(credentials.password, userFound.password);
-
         if (!matchPassword) throw new Error("Wrong password");
 
         return {
@@ -42,8 +38,6 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/login",
   },
-};
-
-const handler = NextAuth(authOptions);
+});
 
 export { handler as GET, handler as POST };
