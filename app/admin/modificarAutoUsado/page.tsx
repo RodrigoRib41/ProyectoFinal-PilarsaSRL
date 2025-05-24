@@ -220,7 +220,7 @@ export default function ModificarAuto() {
                 <input
                   id={name}
                   name={name}
-                  value={(formData as any)[name]}
+                  value={(formData as unknown)[name]}
                   onChange={handleChange}
                   className="border p-2 rounded"
                   placeholder={name}
