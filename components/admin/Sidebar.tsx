@@ -21,9 +21,20 @@ export default function Sidebar() {
         <Link href="/admin/modificarAutoUsado" className="block hover:bg-gray-700 p-2 rounded">
           Modificar Auto Usado
         </Link>
-        <Link href="/admin/servicios" className="block hover:bg-gray-700 p-2 rounded">
-          Services
+        <Link href="/admin/agregarServicios" className="block hover:bg-gray-700 p-2 rounded">
+          Agregar Services
         </Link>
+        <Link href="/admin/listarYmodificarServicies" className="block hover:bg-gray-700 p-2 rounded">
+          Modificar Services
+        </Link>
+        <Link href="/admin/agregarVehiculoServicies" className="block hover:bg-gray-700 p-2 rounded">
+          Agregar vehiculo para Services
+        </Link>
+        <Link href="/admin/modificarVehiculo" className="block hover:bg-gray-700 p-2 rounded">
+          Modificar vehiculo para Services
+        </Link>
+        
+        
       </nav>
     </aside>
   );

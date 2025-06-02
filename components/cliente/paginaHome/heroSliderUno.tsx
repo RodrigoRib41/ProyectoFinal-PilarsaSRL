@@ -9,9 +9,9 @@ import { Poppins } from "next/font/google";
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const images = [
-  { src: "/bj30SLIDER.png", model: "/logoVarios/logobj30SLIDER.webp", link: "/bj30" },
-  { src: "/x55plusSLIDER.jpg", model: "/logoVarios/logox55PLUSSLIDER.png", link: "/x55plus" },
-  { src: "/u5plusSLIDER.jpg", model: "/logoVarios/logoU5plusSLIDER.webp", link: "/u5plus" }
+  { src: "/bj30SLIDER.png", model: "/logoVarios/logobj30SLIDER.webp", link: "/cliente/modelo/baicBJ30" },
+  { src: "/x55plusSLIDER.jpg", model: "/logoVarios/logox55PLUSSLIDER.png", link: "/cliente/modelo/baicX55PLUS" },
+  { src: "/u5plusSLIDER.jpg", model: "/logoVarios/logoU5plusSLIDER.webp", link: "/cliente/modelo/baicU5PLUS" }
 ];
 
 export default function HeroSlider() {

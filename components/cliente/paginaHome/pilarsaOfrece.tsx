@@ -7,22 +7,22 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const servicios = [
   { 
-    nombre: "Financia a tu medida", 
+    nombre: "Financiacion a tu medida", 
     descripcion: "Trabajamos con los mejores bancos y nos encargamos de todos los tramites.",
     img: "/homePilarsaSection/paraFinanciarHome.png", 
-    link: "/financiamiento" 
+    link: "/cliente/usados" 
   },
   { 
     nombre: "Servicio posventa", 
     descripcion: "Mantenimiento para tu Baic.",
     img: "/homePilarsaSection/fotoMecanicoGen.webp", 
-    link: "/servicio-tecnico" 
+    link: "/cliente/service" 
   },
   { 
     nombre: "Usados", 
     descripcion: "Encontra el tuyo entre nuestras ofertas.",
     img: "/homePilarsaSection/paraUsadoHome.jpg", 
-    link: "/compra-venta" 
+    link: "/cliente/usados" 
   },
 ];
 
@@ -30,7 +30,7 @@ export default function PilarsaOfrece() {
   return (
     <div className={`py-12 px-4 sm:px-6 md:px-12 lg:px-20 text-center ${poppins.className}`}>
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8">
-        Pilarsa te ofrece
+        En Pilarsa vas a encontrar
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

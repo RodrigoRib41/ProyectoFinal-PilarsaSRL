@@ -97,7 +97,7 @@ export default function Navbar() {
        {/* 📱 Menú Móvil */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute left-0 top-full w-full bg-white shadow-lg p-4 flex flex-col items-center space-y-4">
-          <Link href="/cliente" className="text-xl font-bold hover:text-blue-600">Inicio</Link>
+          <Link href="/cliente" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold hover:text-blue-600">Inicio</Link>
           <button
             className="text-xl font-bold hover:text-blue-600"
             onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
@@ -109,7 +109,7 @@ export default function Navbar() {
           {isMobileDropdownOpen && (
             <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-3">
               {autos.map((auto) => (
-                <Link key={auto.id} href={`/cliente/modelo/baic${auto.nombre.replace(/\s+/g, "")}`} className="block text-center w-full">
+                <Link key={auto.id} href={`/cliente/modelo/baic${auto.nombre.replace(/\s+/g, "")}`} onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full">
                   <Image 
                     src={auto.img.trim()} 
                     alt={auto.nombre} 
@@ -123,9 +123,9 @@ export default function Navbar() {
             </div>
           )}
 
-          <Link href="/cliente/usados" className="text-xl font-bold hover:text-blue-600">Usados</Link>
-          <Link href="/cliente/service" className="text-xl font-bold hover:text-blue-600">Services</Link>
-          <Link href="/cliente/contacto" className="text-xl font-bold hover:text-blue-600">Contacto</Link>
+          <Link href="/cliente/usados" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold hover:text-blue-600">Usados</Link>
+          <Link href="/cliente/service" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold hover:text-blue-600">Services</Link>
+          <Link href="/cliente/contacto" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold hover:text-blue-600">Contacto</Link>
         </div>
       )}
     </header>

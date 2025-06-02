@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import ContactoForm from "@/components/cliente/Formulario";
 import { Poppins } from "next/font/google";
+import { Toaster } from "sonner";
+
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -88,6 +90,7 @@ export default function Servicios() {
         </div>
         </div>
         <ContactoForm />
+        <Toaster richColors position="top-right" />
     </div>
   );
 }

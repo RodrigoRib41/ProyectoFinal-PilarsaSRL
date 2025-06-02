@@ -22,23 +22,30 @@ updateAt DateTime @updatedAt
 }
 
 model Vehiculo {
-  id        Int       @id @default(autoincrement())
-  patente   String    @unique
-  marca     String
-  version   String
-  año       Int
+  id         Int       @id @default(autoincrement())
+  patente    String    @unique
+  marca      String
+  version    String
+  año        Int
   kilometros Int
-  services  Service[]
+  services   Service[]
 }
 
 model Service {
-  id          Int       @id @default(autoincrement())
-  vehiculoId  Int
-  fecha       DateTime  @default(now())
-  descripcion String
-  kilometros  Int
-  vehiculo    Vehiculo  @relation(fields: [vehiculoId], references: [id])
+  id                  Int       @id @default(autoincrement())
+  vehiculoId          Int
+  nombreCliente       String
+  telefonoCliente     String
+  domicilioCliente    String
+  fecha               DateTime  @default(now())
+  fechaHoraProgramada DateTime
+  descripcion         String
+  kilometros          Int
+  estado              String    @default("Pendiente")
+  vehiculo            Vehiculo  @relation(fields: [vehiculoId], references: [id])
 }
+
+
 
 model Auto {
   id          Int      @id @default(autoincrement())

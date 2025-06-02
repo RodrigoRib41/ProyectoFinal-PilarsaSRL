@@ -45,7 +45,7 @@ export default function ContactoForm() {
   });
 
   const onSubmit = async (data: ContactoFormData) => {
-    const res = await fetch("/api/enviar-email", {
+    const res = await fetch("/api/envairEmail/enviar-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

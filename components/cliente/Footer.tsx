@@ -19,11 +19,12 @@ export default function Footer() {
           <h3 className="font-semibold">Información</h3>
           <ul className="mt-2 space-y-2">
             <li>
-              <Link href="/contacto" className="text-gray-400 hover:text-white">Contáctenos</Link>
+              <Link href="/cliente/contacto" className="text-gray-400 hover:text-white">Contáctenos</Link>
             </li>
             <li>
-              <Link href="/sugerencias" className="text-gray-400 hover:text-white">Sugerencias y Reclamos</Link>
+              <Link href="/cliente/contacto" className="text-gray-400 hover:text-white">Sugerencias y Reclamos</Link>
             </li>
+            <li className="text-gray-400 hover:text-white">343-4982440</li>
           </ul>
         </div>
 
@@ -31,17 +32,17 @@ export default function Footer() {
         <div className="flex flex-col items-center">
           <h3 className="font-semibold">Redes Sociales</h3>
           <div className="flex gap-4 mt-2">
-            <Link href="#" target="_blank">
+            <Link href="https://www.facebook.com/p/Pilarsa-SRL-Automotores-100063692341121/?locale=es_LA" target="_blank">
               <div className="p-2 bg-gray-700 rounded-full hover:bg-gray-500">
                 <FacebookIcon size={20} className="text-white" />
               </div>
             </Link>
-            <Link href="#" target="_blank">
+            <Link href="https://www.instagram.com/pilarsasrlok/?hl=es" target="_blank">
               <div className="p-2 bg-gray-700 rounded-full hover:bg-gray-500">
                 <InstagramIcon size={20} className="text-white" />
               </div>
             </Link>
-            <Link href="#" target="_blank">
+            <Link href="https://wa.me/3434694300" target="_blank">
               <div className="p-2 bg-gray-700 rounded-full hover:bg-gray-500">
                 <MessageCircle size={20} className="text-white" />
               </div>
