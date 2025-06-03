@@ -208,7 +208,7 @@ export default function AutosUsados() {
                 alt={`${auto.marca} ${auto.modelo}`}
                 width={400}
                 height={300}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-contain bg-black"
               />
             ) : (
               <div className="w-full h-48 bg-gray-200 flex items-center justify-center">

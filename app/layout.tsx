@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PilarsaSRL",
   description: "Pagina Web PilarsaSRL",
+  icons: {
+    icon: '/logoVarios/logoBaic.png',
+  },
 };
 
 export default function RootLayout({
