@@ -8,6 +8,7 @@ interface Auto {
   version: string;
   año: number;
   precio: number;
+  precioPromocional?: number; // <-- agregamos aquí
   moneda: string;
   kilometros: number;
   color: string;
@@ -45,6 +46,7 @@ export default function ModificarAuto() {
       version: '',
       año: 0,
       precio: 0,
+      precioPromocional: 0,  // <-- inicializamos
       moneda: '$',
       kilometros: 0,
       color: '',
@@ -93,6 +95,7 @@ export default function ModificarAuto() {
         version: selected.version,
         año: selected.año,
         precio: selected.precio,
+        precioPromocional: selected.precioPromocional ?? 0, // <-- agregado
         moneda: selected.moneda,
         kilometros: selected.kilometros,
         color: selected.color,
@@ -111,9 +114,12 @@ export default function ModificarAuto() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    if (name === 'precioPromocional' && +value < 0) return;
+
     setFormData(prev => ({
       ...prev,
-      [name]: ['año', 'precio', 'kilometros'].includes(name) ? +value : value,
+      [name]: ['año', 'precio', 'kilometros', 'precioPromocional'].includes(name) ? +value : value,
     }));
   };
 
@@ -240,6 +246,17 @@ export default function ModificarAuto() {
             <div className="flex flex-col">
               <label htmlFor="kilometros" className="font-medium text-sm mb-1">Kilómetros</label>
               <input id="kilometros" name="kilometros" value={formData.kilometros} onChange={handleChange} type="number" className="border p-2 rounded" />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="precioPromocional" className="font-medium text-sm mb-1">Precio Promocional</label>
+              <input
+                id="precioPromocional"
+                name="precioPromocional"
+                value={formData.precioPromocional || 0}
+                onChange={handleChange}
+                type="number"
+                className="border p-2 rounded"
+              />
             </div>
           </div>
 

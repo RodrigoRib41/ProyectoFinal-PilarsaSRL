@@ -54,6 +54,7 @@ model Auto {
   version     String
   año         Int
   precio      Float
+  precioPromocional Float?
   moneda      String
   kilometros  Int
   color       String
@@ -66,3 +67,4 @@ model Auto {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+

@@ -1,16 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '@/lib/db';
 import { v2 as cloudinary } from 'cloudinary';
-import formidable, { File } from 'formidable';
+import formidable from 'formidable';
 
-// Configuración para desactivar el bodyParser
+// Configuración para desactivar el bodyParser de Next.js (para manejar formularios multipart)
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-// Cloudinary
+// Configurar Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
   api_key: process.env.CLOUDINARY_API_KEY!,
@@ -26,6 +26,7 @@ type AutoUpdateData = {
   version: string;
   año: number;
   precio: number;
+  precioPromocional?: number | null;
   moneda: string;
   kilometros: number;
   color: string;
@@ -57,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Error al obtener el auto' });
     }
   }
-  // PUT: Actualizar auto
+
   if (req.method === 'PUT') {
     const form = formidable({ multiples: true });
 
@@ -72,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           version: String(fields.version || ''),
           año: fields.año ? Number(fields.año) : 0,
           precio: fields.precio ? Number(fields.precio) : 0,
+          precioPromocional: fields.precioPromocional? Number(fields.precioPromocional): null,
           moneda: String(fields.moneda),
           kilometros: fields.kilometros ? Number(fields.kilometros) : 0,
           color: String(fields.color),
@@ -79,55 +81,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           descripcion: String(fields.descripcion),
         };
 
-        for (let idx = 0; idx < fotoKeys.length; idx++) {
-          const key = fotoKeys[idx];
+        for (const key of fotoKeys) {
           const fileOrUrl = files[key] ?? fields[key];
 
           if (fileOrUrl) {
-            if (Array.isArray(fileOrUrl)) {
-              // Si es array, agarramos el primero (por seguridad)
-              const item = fileOrUrl[0];
-            
-              if (typeof item === 'object' && 'filepath' in item) {
-                const uploadResult = await cloudinary.uploader.upload(item.filepath, { folder: 'autos' });
-                updatedAutoData[key] = uploadResult.secure_url;
-              }
-               else if (typeof item === 'string') {
-                updatedAutoData[key] = item;
-              }
-            }
-            else {
-              if (typeof fileOrUrl === 'object' && fileOrUrl !== null && 'filepath' in fileOrUrl) {
-                const file = fileOrUrl as File;
-                const uploadResult = await cloudinary.uploader.upload(file.filepath, { folder: 'autos' });
-                updatedAutoData[key] = uploadResult.secure_url;
-              } else if (typeof fileOrUrl === 'string') {
-                updatedAutoData[key] = fileOrUrl;
-              }
+            const item = Array.isArray(fileOrUrl) ? fileOrUrl[0] : fileOrUrl;
+
+            if (typeof item === 'object' && 'filepath' in item) {
+              const uploadResult = await cloudinary.uploader.upload(item.filepath, { folder: 'autos' });
+              updatedAutoData[key] = uploadResult.secure_url;
+            } else if (typeof item === 'string') {
+              updatedAutoData[key] = item;
             }
           } else {
-            updatedAutoData[key] = null; // Si no hay nada, eliminamos la foto
+            updatedAutoData[key] = null; // Si no se envía la foto, la eliminamos
           }
         }
 
-        // Actualizar en la base de datos
         const updatedAuto = await db.auto.update({
           where: { id },
           data: updatedAutoData,
         });
 
         return res.status(200).json(updatedAuto);
-
       } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Error al actualizar el auto' });
       }
     });
+    return;
+  }
 
-  // DELETE: Eliminar auto por ID
-  } else if (req.method === 'DELETE') {
+  if (req.method === 'DELETE') {
     try {
-      // Buscar el auto por ID para verificar si existe
       const auto = await db.auto.findUnique({
         where: { id },
       });
@@ -136,7 +122,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Auto no encontrado' });
       }
 
-      // Eliminar el auto de la base de datos
       await db.auto.delete({
         where: { id },
       });
@@ -147,24 +132,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Error al eliminar el auto' });
     }
   }
-  // GET: Obtener auto por ID
-else if (req.method === 'GET') {
-  try {
-    const auto = await db.auto.findUnique({
-      where: { id },
-    });
 
-    if (!auto) {
-      return res.status(404).json({ error: 'Auto no encontrado' });
-    }
-
-    return res.status(200).json(auto);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al obtener el auto' });
-  }
-}
- else {
-    return res.status(405).json({ error: `Método ${req.method} no permitido` });
-  }
+  return res.status(405).json({ error: `Método ${req.method} no permitido` });
 }
