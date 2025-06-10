@@ -68,3 +68,20 @@ model Auto {
   updatedAt   DateTime @updatedAt
 }
 
+model Balance {
+  id        Int      @id @default(autoincrement())
+  tipo      TipoMovimiento // Enum: 'INGRESO' o 'EGRESO'
+  monto     Float
+  fecha     DateTime
+  marca     String
+  modelo    String
+  anio      Int
+  kilometros Int
+  @@map("balance") // Nombre de la tabla en la base de datos (opcional)
+}
+
+// Enum para el tipo de movimiento
+enum TipoMovimiento {
+  INGRESO
+  EGRESO
+}
