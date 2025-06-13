@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -17,9 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PilarsaSRL",
   description: "Pagina Web PilarsaSRL",
-  icons: {
-    icon: '/logoVarios/logoBaic.png',
-  },
 };
 
 export default function RootLayout({
@@ -29,9 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logoVarios/logoPilarsaagua.png" type="image/png" />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}> 
-        <NextTopLoader color="#000"/>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <NextTopLoader color="#000" />
         {children}
       </body>
     </html>
