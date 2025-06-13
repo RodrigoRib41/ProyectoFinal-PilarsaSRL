@@ -18,6 +18,7 @@ interface Auto {
   kilometros: number;
   version: string;
   descripcion: string;
+  precioPromocional?: number;
   categoria: string;
   createdAt: string;
   foto1?: string | null;
@@ -122,9 +123,21 @@ return (
     <div>
       <h2 className="text-2xl font-bold">{auto.marca}</h2>
       <h3 className="text-xl text-gray-700">{auto.modelo}</h3>
-      <p className="text-lg font-semibold text-black mt-2">
-        {auto.moneda} {auto.precio.toLocaleString()}
-      </p>
+      {auto.precioPromocional && auto.precioPromocional > 0 ? (
+        <div className="mt-2">
+          <p className="text-lg font-semibold text-gray-500 line-through">
+            {auto.moneda} {auto.precio.toLocaleString()}
+          </p>
+          <p className="text-2xl font-bold text-green-600">
+            {auto.moneda} {auto.precioPromocional.toLocaleString()}
+          </p>
+        </div>
+      ) : (
+        <p className="text-lg font-semibold text-black mt-2">
+          {auto.moneda} {auto.precio.toLocaleString()}
+        </p>
+      )}
+
 
       <Link href="/cliente/contacto">
         <button className="mt-4 px-4 py-2 border rounded-lg hover:bg-gray-200">

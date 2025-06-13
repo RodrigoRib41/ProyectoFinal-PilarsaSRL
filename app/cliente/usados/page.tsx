@@ -13,11 +13,13 @@ interface Auto {
   marca: string;
   modelo: string;
   precio: number;
+  precioPromocional?: number;
   moneda: string;
   año: number;
   kilometros: number;
   foto1?: string;
 }
+
 
 export default function AutosUsados() {
   const [autos, setAutos] = useState<Auto[]>([]);
@@ -32,6 +34,8 @@ export default function AutosUsados() {
   const [añoSeleccionado, setAñoSeleccionado] = useState<number | string>('');
   const [precioFiltro, setPrecioFiltro] = useState([0, 0]);
   const [kmFiltro, setKmFiltro] = useState([0, 0]);
+  const [mostrarPromociones, setMostrarPromociones] = useState(false);
+
 
   // 🔹 Cargar autos al inicio
   useEffect(() => {
@@ -90,9 +94,13 @@ export default function AutosUsados() {
         auto.kilometros >= kmFiltro[0] && auto.kilometros <= kmFiltro[1]
       );
     }
+    if (mostrarPromociones) {
+      filtrados = filtrados.filter(auto => auto.precioPromocional && auto.precioPromocional > 0);
+    }
+
 
     setAutosFiltrados(filtrados);
-  }, [marcaSeleccionada, añoSeleccionado, autos, precioFiltro, kmFiltro]);
+  }, [marcaSeleccionada, añoSeleccionado, autos, precioFiltro, kmFiltro, mostrarPromociones]);
 
   return (
     <div className={`${poppins.className} p-6`}>
@@ -192,6 +200,15 @@ export default function AutosUsados() {
             </p>
           </div>
         </div>
+        <button
+          onClick={() => setMostrarPromociones(!mostrarPromociones)}
+          className={`border px-4 py-2 rounded ${
+            mostrarPromociones ? 'bg-green-600 text-white' : 'bg-white text-black border-gray-400'
+          } hover:shadow`}
+        >
+          {mostrarPromociones ? 'Ver todos' : 'Ver solo promociones'}
+        </button>
+        
       </div>
 
       {/* 🔹 Lista de autos */}
@@ -219,9 +236,21 @@ export default function AutosUsados() {
             <h2 className="text-lg font-semibold">{auto.marca} {auto.modelo}</h2>
             <p className="text-black">Año: {auto.año} &nbsp; Kilómetros: {auto.kilometros}</p>
 
+          {auto.precioPromocional && auto.precioPromocional > 0 ? (
+            <div>
+              <p className="text-black line-through text-base">
+                {auto.moneda} {auto.precio}
+              </p>
+              <p className="text-red-600 font-bold text-lg">
+                {auto.moneda} {auto.precioPromocional}
+              </p>
+            </div>
+          ) : (
             <p className="text-black font-bold">
               {auto.moneda} {auto.precio}
             </p>
+          )}
+
             <Link
               href={`/cliente/usados/${auto.id}`}
               className="text-blue-600 hover:underline mt-2 inline-block"
