@@ -1,4 +1,3 @@
-// app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
@@ -28,9 +27,11 @@ const handler = NextAuth({
         const matchPassword = await bcrypt.compare(credentials.password, userFound.password);
         if (!matchPassword) throw new Error("Wrong password");
 
+        // ➕ Agregamos el role en el retorno
         return {
           id: userFound.id.toString(),
           name: userFound.username,
+          role: userFound.role, // <-- importante para el token
         };
       },
     }),
@@ -38,6 +39,21 @@ const handler = NextAuth({
   pages: {
     signIn: "/auth/login",
   },
+  callbacks: {
+  async jwt({ token, user }) {
+    if (user && typeof user === "object" && "role" in user) {
+      token.role = (user as { role: string }).role;
+    }
+    return token;
+  },
+  async session({ session, token }) {
+    if (token && session.user) {
+      (session.user as { role?: string }).role = token.role as string;
+    }
+    return session;
+  },
+},
+
 });
 
 export { handler as GET, handler as POST };

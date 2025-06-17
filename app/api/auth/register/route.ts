@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 
-
 interface UserRequest {
   username: string;
   password: string;
+  role: "STOCK" | "SERVICES" | "FINANZAS" | "SUPERADMIN";
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -28,6 +28,7 @@ export async function POST(request: Request): Promise<Response> {
       data: {
         username: data.username,
         password: hashedPassword,
+        role: data.role, // ✅ AQUÍ se guarda el rol recibido
       },
     });
 

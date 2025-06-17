@@ -53,11 +53,11 @@ export default function Sidebar() {
       <div>
         <h3 className="text-sm uppercase font-semibold text-gray-400 mb-2">BALANCE</h3>
         <nav className="space-y-1">
-          <Link href="/admin/compras" className="block hover:bg-gray-700 p-2 rounded">
-            Ingresos (Compras)
-          </Link>
           <Link href="/admin/ventas" className="block hover:bg-gray-700 p-2 rounded">
-            Egresos (Ventas)
+            Ingreso (Ventas)
+          </Link>
+          <Link href="/admin/compras" className="block hover:bg-gray-700 p-2 rounded">
+            Egreso (Compras)
           </Link>
           <Link href="/admin/balance" className="block hover:bg-gray-700 p-2 rounded">
             Balance

@@ -238,9 +238,6 @@ export default function ModificarAuto() {
   </div>
 {/*</section>*/}
 
-
-
-
       {/* Formulario */}
       {formData.marca && (
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-sm space-y-4">
