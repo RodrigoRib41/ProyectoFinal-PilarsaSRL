@@ -17,8 +17,12 @@ export default function VentasPage() {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  // Guardamos el valor "limpio" (solo números) en precioVentaEditable
   const [precioVentaEditable, setPrecioVentaEditable] = useState<{ [autoId: number]: string }>({});
+
+  // Estados para filtros
+  const [filtroMarca, setFiltroMarca] = useState('');
+  const [filtroModelo, setFiltroModelo] = useState('');
+  const [filtroAño, setFiltroAño] = useState('');
 
   useEffect(() => {
     fetchAutos();
@@ -30,7 +34,6 @@ export default function VentasPage() {
       setAutos(res.data);
       const preciosIniciales: { [key: number]: string } = {};
       res.data.forEach((auto: Auto) => {
-        // Guardamos el precio como string limpio (solo números)
         preciosIniciales[auto.id] = auto.precio.toString();
       });
       setPrecioVentaEditable(preciosIniciales);
@@ -41,14 +44,12 @@ export default function VentasPage() {
     }
   };
 
-  // Formatear número con puntos cada 3 dígitos, sin decimales
   const formatoMiles = (num: number | string) => {
     const n = typeof num === 'number' ? num : parseInt(num.replace(/\./g, ''), 10) || 0;
     return n.toLocaleString('es-AR');
   };
 
   const handlePrecioChange = (autoId: number, valor: string) => {
-    // Guardar solo números, quitar puntos y cualquier otro carácter
     const limpio = valor.replace(/[^0-9]/g, '');
     setPrecioVentaEditable((prev) => ({
       ...prev,
@@ -89,9 +90,48 @@ export default function VentasPage() {
     }
   };
 
+  // Filtrar autos según los filtros (ignorando mayúsculas/minúsculas)
+  const autosFiltrados = autos.filter((auto) => {
+    const marcaMatch = auto.marca.toLowerCase().includes(filtroMarca.toLowerCase());
+    const modeloMatch = auto.modelo.toLowerCase().includes(filtroModelo.toLowerCase());
+    const añoMatch = filtroAño === '' || auto.año === Number(filtroAño);
+
+    return marcaMatch && modeloMatch && añoMatch;
+  });
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Registrar Venta de Autos</h1>
+
+      {/* Filtros */}
+      <div className="mb-4 flex gap-4">
+        <input
+          type="text"
+          placeholder="Filtrar por Marca"
+          value={filtroMarca}
+          onChange={(e) => setFiltroMarca(e.target.value)}
+          className="border p-2 rounded w-1/3"
+          disabled={loading}
+        />
+        <input
+          type="text"
+          placeholder="Filtrar por Modelo"
+          value={filtroModelo}
+          onChange={(e) => setFiltroModelo(e.target.value)}
+          className="border p-2 rounded w-1/3"
+          disabled={loading}
+        />
+        <input
+          type="number"
+          placeholder="Filtrar por Año"
+          value={filtroAño}
+          onChange={(e) => setFiltroAño(e.target.value)}
+          className="border p-2 rounded w-1/3"
+          disabled={loading}
+          min={1900}
+          max={new Date().getFullYear()}
+        />
+      </div>
 
       <table className="w-full border border-gray-300">
         <thead>
@@ -106,14 +146,14 @@ export default function VentasPage() {
           </tr>
         </thead>
         <tbody>
-          {autos.length === 0 ? (
+          {autosFiltrados.length === 0 ? (
             <tr>
               <td colSpan={7} className="text-center p-4">
                 No hay autos disponibles.
               </td>
             </tr>
           ) : (
-            autos.map((auto) => (
+            autosFiltrados.map((auto) => (
               <tr key={auto.id}>
                 <td className="p-2 border">{auto.marca}</td>
                 <td className="p-2 border">{auto.modelo}</td>
@@ -123,7 +163,6 @@ export default function VentasPage() {
                 <td className="p-2 border">
                   <input
                     type="text"
-                    // Mostrar formateado con puntos, pero guardar limpio
                     value={precioVentaEditable[auto.id] ? formatoMiles(precioVentaEditable[auto.id]) : ''}
                     onChange={(e) => handlePrecioChange(auto.id, e.target.value)}
                     className="border p-1 w-full"
@@ -145,7 +184,7 @@ export default function VentasPage() {
         </tbody>
       </table>
 
-      {/* Modal de mensaje */}
+      {/* Modal */}
       {modalVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded p-6 max-w-sm w-full text-center shadow-lg">

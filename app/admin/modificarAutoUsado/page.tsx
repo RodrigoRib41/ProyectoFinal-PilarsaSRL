@@ -8,7 +8,7 @@ interface Auto {
   version: string;
   año: number;
   precio: number;
-  precioPromocional?: number; // <-- agregamos aquí
+  precioPromocional?: number;
   moneda: string;
   kilometros: number;
   color: string;
@@ -22,6 +22,7 @@ interface Auto {
 
 interface SearchFilters {
   marca: string;
+  modelo: string;
   año: string;
 }
 
@@ -31,12 +32,12 @@ export default function ModificarAuto() {
   const [autos, setAutos] = useState<Auto[]>([]);
   const [filteredAutos, setFilteredAutos] = useState<Auto[]>([]);
   const [formData, setFormData] = useState<Omit<Auto, 'foto1' | 'foto2' | 'foto3' | 'foto4'>>(defaultFormData());
-  const [fotos, setFotos] = useState<FotoFields>([null, null, null, null]); // Foto1, foto2, foto3, foto4
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>({ marca: '', año: '' });
+  const [fotos, setFotos] = useState<FotoFields>([null, null, null, null]);
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({ marca: '', modelo: '', año: '' });
   const [marcas, setMarcas] = useState<string[]>([]);
+  const [modelos, setModelos] = useState<string[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
-
 
   function defaultFormData() {
     return {
@@ -46,7 +47,7 @@ export default function ModificarAuto() {
       version: '',
       año: 0,
       precio: 0,
-      precioPromocional: 0,  // <-- inicializamos
+      precioPromocional: 0,
       moneda: '$',
       kilometros: 0,
       color: '',
@@ -63,6 +64,7 @@ export default function ModificarAuto() {
         setAutos(data);
         setFilteredAutos(data);
         setMarcas([...new Set(data.map(a => a.marca))]);
+        setModelos([...new Set(data.map(a => a.modelo))]);
       } catch (err) {
         console.error(err);
         alert('Error al obtener autos');
@@ -75,6 +77,7 @@ export default function ModificarAuto() {
     setFilteredAutos(
       autos.filter(auto =>
         (!searchFilters.marca || auto.marca.toLowerCase().includes(searchFilters.marca.toLowerCase())) &&
+        (!searchFilters.modelo || auto.modelo.toLowerCase().includes(searchFilters.modelo.toLowerCase())) &&
         (!searchFilters.año || auto.año === +searchFilters.año)
       )
     );
@@ -95,7 +98,7 @@ export default function ModificarAuto() {
         version: selected.version,
         año: selected.año,
         precio: selected.precio,
-        precioPromocional: selected.precioPromocional ?? 0, // <-- agregado
+        precioPromocional: selected.precioPromocional ?? 0,
         moneda: selected.moneda,
         kilometros: selected.kilometros,
         color: selected.color,
@@ -114,7 +117,6 @@ export default function ModificarAuto() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
     if (name === 'precioPromocional' && +value < 0) return;
 
     setFormData(prev => ({
@@ -143,7 +145,6 @@ export default function ModificarAuto() {
     e.preventDefault();
 
     const formDataToSend = new FormData();
-
     Object.entries(formData).forEach(([key, value]) => {
       formDataToSend.append(key, String(value));
     });
@@ -155,7 +156,7 @@ export default function ModificarAuto() {
       } else if (typeof foto === 'string') {
         formDataToSend.append(key, foto);
       } else {
-        formDataToSend.append(key, ''); // Si se eliminó la foto
+        formDataToSend.append(key, '');
       }
     });
 
@@ -170,48 +171,75 @@ export default function ModificarAuto() {
       setShowSuccess(true);
     } catch (err) {
       console.error(err);
-      alert('Error al actualizar el auto');
       setShowError(true);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    
+    <div className="grid grid-cols-1 gap-4">
       <h1 className="text-2xl font-bold mb-4">Modificar Auto</h1>
 
       {/* Filtros */}
-      <section className="mb-6 bg-gray-50 p-4 rounded shadow-sm">
+    
         <h2 className="font-semibold mb-2">Buscar Auto</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <select name="marca" value={searchFilters.marca} onChange={handleSearchChange} className="border p-2 rounded">
-            <option value="">Marca</option>
+            <option value="">Selecciona una marca...</option>
             {marcas.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
+          <select name="modelo" value={searchFilters.modelo} onChange={handleSearchChange} className="border p-2 rounded">
+            <option value="">Selecciona un modelo...</option>
+            {modelos.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
           <select name="año" value={searchFilters.año} onChange={handleSearchChange} className="border p-2 rounded">
-            <option value="">Año</option>
+            <option value="">Selecciona un año...</option>
             {Array.from({ length: 26 }, (_, i) => {
               const year = new Date().getFullYear() - i;
               return <option key={year} value={year}>{year}</option>;
             })}
           </select>
         </div>
-      </section>
+      
+
 
       {/* Resultados */}
-      <section className="mb-6 bg-gray-50 p-4 rounded shadow-sm">
-        <h2 className="font-semibold mb-2">Resultados</h2>
-        <div className="space-y-2">
-          {filteredAutos.map(auto => (
-            <button
-              key={auto.id}
-              onClick={() => handleAutoSelect(auto.id)}
-              className="block w-full text-left p-2 border rounded hover:bg-gray-100"
-            >
-              {auto.marca} {auto.modelo} ({auto.año})
-            </button>
-          ))}
-        </div>
-      </section>
+{/*<section className="mb-6 bg-gray-50 p-4 rounded shadow-sm">*/}
+  <h2 className="font-semibold mb-2">Resultados</h2>
+  <div className="max-h-64 overflow-y-auto border rounded mb-4">
+    <table className="min-w-full text-sm text-left table-fixed">
+      <thead className="sticky top-0 bg-white z-10">
+        <tr>
+          <th className="px-4 py-2 border-b w-1/4">Marca</th>
+              <th className="px-4 py-2 border-b w-1/4">Modelo</th>
+              <th className="px-4 py-2 border-b w-1/4">Año</th>
+              <th className="px-4 py-2 border-b w-1/4">Kilómetros</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {filteredAutos.map(auto => (
+          <tr
+            key={auto.id}
+            onClick={() => {
+              handleAutoSelect(auto.id);
+              const formSection = document.querySelector('form');
+              if (formSection) formSection.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="cursor-pointer hover:bg-blue-50 transition duration-150"
+          >
+            <td className="px-4 py-2 text-sm">{auto.marca}</td>
+            <td className="px-4 py-2 text-sm">{auto.modelo}</td>
+            <td className="px-4 py-2 text-sm">{auto.año}</td>
+            <td className="px-4 py-2 text-sm">{auto.kilometros.toLocaleString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+{/*</section>*/}
+
+
+
 
       {/* Formulario */}
       {formData.marca && (
