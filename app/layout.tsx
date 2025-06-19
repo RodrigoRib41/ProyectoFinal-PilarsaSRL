@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NextTopLoader from 'nextjs-toploader';
+import NextTopLoader from "nextjs-toploader";
+import ClienteLayoutWrapper from "@/components/ClienteLayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PilarsaSRL",
-  description: "Pagina Web PilarsaSRL",
+  description: "Página Web PilarsaSRL",
 };
 
 export default function RootLayout({
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link rel="icon" href="/logoVarios/logoPilarsa.png" type="image/png" />
       </head>
@@ -32,7 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextTopLoader color="#000" />
-        {children}
+        <ClienteLayoutWrapper>{children}</ClienteLayoutWrapper>
       </body>
     </html>
   );

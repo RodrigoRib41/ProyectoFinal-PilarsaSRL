@@ -19,10 +19,10 @@ export default function Footer() {
           <h3 className="font-semibold">Información</h3>
           <ul className="mt-2 space-y-2">
             <li>
-              <Link href="/cliente/contacto" className="text-gray-400 hover:text-white">Contáctenos</Link>
+              <Link href="/contacto" className="text-gray-400 hover:text-white">Contáctenos</Link>
             </li>
             <li>
-              <Link href="/cliente/contacto" className="text-gray-400 hover:text-white">Sugerencias y Reclamos</Link>
+              <Link href="/contacto" className="text-gray-400 hover:text-white">Sugerencias y Reclamos</Link>
             </li>
             <li className="text-gray-400 hover:text-white">343-4982440</li>
           </ul>

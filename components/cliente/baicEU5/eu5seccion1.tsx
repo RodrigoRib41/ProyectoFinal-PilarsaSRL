@@ -51,7 +51,7 @@ export default function BaicX35Hero() {
         </div>
 
         {/* Botón */}
-        <Link href="/cliente/contacto">
+        <Link href="/contacto">
           <button className="mt-10 px-8 py-3 border rounded-full font-semibold text-lg hover:bg-black hover:text-white transition">
             CONTACTANOS
           </button>
