@@ -1,8 +1,10 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 type FormData = {
   username: string;
@@ -19,15 +21,12 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-
     const res = await signIn("credentials", {
       username: data.username,
       password: data.password,
       redirect: false,
     });
 
-    console.log(res);
     if (res?.error) {
       setError(res.error);
     } else {
@@ -38,30 +37,41 @@ function LoginPage() {
 
   return (
     <div className="h-[calc(100vh-7rem)] flex justify-center items-center">
-      <form onSubmit={onSubmit} className="w-1/4">
+      <form onSubmit={onSubmit} className="w-1/4 bg-white p-6 rounded shadow-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <Image
+            src="/logoVarios/logoPilarsaagua.png"
+            alt="Logo Pilarsa"
+            width={150}
+            height={80}
+            priority
+          />
+        </div>
+
+        {/* Mensaje de error */}
         {error && (
           <p className="bg-red-500 text-lg text-white p-3 rounded mb-2">{error}</p>
         )}
 
-        <h1 className="text-black font-bold text-4xl mb-4 text-center">Login</h1>
+        <h1 className="text-black font-bold text-3xl mb-4 text-center">Login</h1>
 
         <label htmlFor="username" className="text-slate-500 mb-2 block text-sm">
-          Username:
+          Usuario:
         </label>
         <input
           type="text"
           {...register("username", {
-            required: "Username is required",
+            required: "El usuario es requerido",
           })}
           className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-          placeholder="yourUser123"
+          placeholder="Usuario..."
         />
-
         {errors.username && (
           <span className="text-red-500 text-xs">{errors.username.message}</span>
         )}
 
-        <label htmlFor="password" className="text-slate-500 mb-2 block text-sm">
+        <label htmlFor="Password" className="text-slate-500 mb-2 block text-sm">
           Password:
         </label>
         <input
@@ -72,7 +82,6 @@ function LoginPage() {
           className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
           placeholder="******"
         />
-
         {errors.password && (
           <span className="text-red-500 text-xs">{errors.password.message}</span>
         )}
@@ -86,5 +95,5 @@ function LoginPage() {
 }
 
 export default function Page() {
-    return <LoginPage />;
-  }
+  return <LoginPage />;
+}
