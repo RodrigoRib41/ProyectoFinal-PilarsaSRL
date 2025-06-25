@@ -252,7 +252,7 @@ export default function AutosUsados() {
           )}
 
             <Link
-              href={`/cliente/usados/${auto.id}`}
+              href={`/usados/${auto.id}`}
               className="text-blue-600 hover:underline mt-2 inline-block"
             >
               Ver detalles
