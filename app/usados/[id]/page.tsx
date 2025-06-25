@@ -139,7 +139,7 @@ return (
       )}
 
 
-      <Link href="/cliente/contacto">
+      <Link href="/contacto">
         <button className="mt-4 px-4 py-2 border rounded-lg hover:bg-gray-200">
           ME INTERESA
         </button>
