@@ -34,10 +34,12 @@ export default function BaicX35Hero() {
       
       {/* Texto */}
       <div className="flex flex-col items-center text-center max-w-xl w-full mx-auto">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4">U5 PLUS</h1>
-        <h2 className="text-xl md:text-2xl font-semibold mb-4">Es posible tener todo en un sedán.</h2>
+        <h1 className="text-5xl md:text-6xl font-bold mb-4">EU5</h1>
+        <h2 className="text-xl md:text-2xl font-semibold mb-4">100% Eléctrico.</h2>
+        <h2 className="text-xl md:text-2xl font-semibold mb-4">Excelente Rendimiento,</h2>
+         <h2 className="text-xl md:text-2xl font-semibold mb-4">Potencia y Tecnología</h2>
         <p className="text-base md:text-lg leading-relaxed">
-          Permorfance, confort y tecnología.
+          Conduccion confortable y ADAS.
         </p>
         
 

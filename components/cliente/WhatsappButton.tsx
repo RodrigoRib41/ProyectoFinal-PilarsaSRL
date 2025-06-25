@@ -1,26 +1,21 @@
-"use client";
+"use client"
+import Image from "next/image";
 
 export default function WhatsappButton() {
   return (
     <a
-      href="https://wa.me/3434694300" // 👉 reemplazá por el número de la empresa
+      href="https://wa.me/3434694300"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-4 right-4 z-50 bg-green-500 rounded-full p-3 shadow-lg hover:bg-green-600 transition-all"
-      style={{
-        width: 'clamp(50px, 6vw, 70px)',
-        height: 'clamp(50px, 6vw, 70px)',
-      }}
+      className="fixed bottom-4 right-4 z-50"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="100%"
-        height="100%"
-        fill="white"
-        viewBox="0 0 24 24"
-      >
-        <path d="M20.52 3.48A11.9 11.9 0 0012 0C5.37 0 .02 5.35 0 11.98a11.93 11.93 0 001.63 6L0 24l6.27-1.64a11.95 11.95 0 005.74 1.47h.01c6.63 0 12.01-5.38 12.01-12.01a11.9 11.9 0 00-3.51-8.34zM12 22c-1.81 0-3.58-.48-5.14-1.4l-.37-.22-3.72.97.99-3.62-.24-.38A9.97 9.97 0 012 11.98C2.02 6.47 6.49 2 12 2c2.66 0 5.18 1.04 7.06 2.93A9.93 9.93 0 0122 11.99C22 17.5 17.51 22 12 22zm5.01-7.5c-.27-.14-1.61-.79-1.86-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.35-.81-.72-1.35-1.61-1.5-1.88-.16-.27-.02-.42.12-.56.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.48-.83-2.04-.22-.52-.45-.45-.61-.46-.16-.01-.34-.02-.52-.02a.99.99 0 00-.72.34C6.5 7.36 6 8.36 6 9.48c0 1.13.79 2.22.9 2.38.11.16 1.56 2.38 3.77 3.34 2.21.95 2.21.63 2.61.59.4-.04 1.32-.54 1.5-1.07.18-.54.18-1 .13-1.07-.05-.07-.22-.11-.49-.25z"/>
-      </svg>
+      <Image
+        src="/logoVarios/logoWhatsappChat.png" // asegurate de que esté en /public
+        alt="WhatsApp"
+        width={100}
+        height={100}
+        priority
+      />
     </a>
   );
 }
