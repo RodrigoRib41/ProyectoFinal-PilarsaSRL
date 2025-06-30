@@ -7,12 +7,12 @@ import { Poppins } from "next/font/google";
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const modelos = [
-  { nombre: "BJ30", img: "/modelosAgua/abj30.png", link: "/cliente/modelo/baicBJ30" },
-  { nombre: "X55 Plus", img: "/modelosAgua/ax55plus.webp", link: "/cliente/modelo/baicX55PLUS" },
-  { nombre: "U5 Plus", img: "/modelosAgua/aguau5plus.png", link: "/cliente/modelo/baicU5PLUS" },
-  { nombre: "X55 II", img: "/modelosAgua/aguax55II.png", link: "/cliente/modelo/baicX55II" },
-  { nombre: "X35", img: "/modelosAgua/aguax35.png", link: "/cliente/modelo/baicX35" },
-  { nombre: "EU5", img: "/modelosAgua/aguaeu5.png", link: "/cliente/modelo/baicEU5" },
+  { nombre: "BJ30", img: "/modelosAgua/abj30.png", link: "/modelo/baicBJ30" },
+  { nombre: "X55 Plus", img: "/modelosAgua/ax55plus.webp", link: "/modelo/baicX55PLUS" },
+  { nombre: "U5 Plus", img: "/modelosAgua/aguau5plus.png", link: "/modelo/baicU5PLUS" },
+  { nombre: "X55 II", img: "/modelosAgua/aguax55II.png", link: "/modelo/baicX55II" },
+  { nombre: "X35", img: "/modelosAgua/aguax35.png", link: "/modelo/baicX35" },
+  { nombre: "EU5", img: "/modelosAgua/aguaeu5.png", link: "/modelo/baicEU5" },
 ];
 
 export default function ModelosSection() {

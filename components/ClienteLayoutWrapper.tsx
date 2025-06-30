@@ -13,6 +13,14 @@ export default function ClienteLayoutWrapper({
 }) {
   const pathname = usePathname();
 
+  // Excluye layout si es /admin o /auth
+  const isAdminOrAuth = pathname?.startsWith("/admin") || pathname?.startsWith("/auth");
+
+
+  if (isAdminOrAuth) {
+    return <>{children}</>; // Sin layout
+  }
+
   return (
     <>
       <Navbar />
