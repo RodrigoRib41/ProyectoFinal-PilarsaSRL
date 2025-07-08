@@ -10,19 +10,19 @@ const servicios = [
     nombre: "Financiacion a tu medida", 
     descripcion: "Trabajamos con los mejores bancos y nos encargamos de todos los tramites.",
     img: "/homePilarsaSection/paraFinanciarHome.png", 
-    link: "/cliente/usados" 
+    link: "/usados" 
   },
   { 
     nombre: "Servicio posventa", 
     descripcion: "Mantenimiento para tu Baic.",
     img: "/homePilarsaSection/fotoMecanicoGen.webp", 
-    link: "/cliente/service" 
+    link: "/service" 
   },
   { 
     nombre: "Usados", 
     descripcion: "Encontra el tuyo entre nuestras ofertas.",
     img: "/homePilarsaSection/paraUsadoHome.jpg", 
-    link: "/cliente/usados" 
+    link: "/usados" 
   },
 ];
 
