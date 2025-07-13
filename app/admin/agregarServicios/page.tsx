@@ -30,7 +30,8 @@ export default function AgregarService() {
   const [repuestos, setRepuestos] = useState<Repuesto[]>([]);
   const [repuestosUsados, setRepuestosUsados] = useState<{ repuestoId: number; cantidad: number }[]>([]);
   const [filtroPatente, setFiltroPatente] = useState("");
-
+  const [filtroNombreRepuesto, setFiltroNombreRepuesto] = useState("");
+  const [filtroCodigoRepuesto, setFiltroCodigoRepuesto] = useState("");
 
   useEffect(() => {
     const fetchVehiculos = async () => {
@@ -102,10 +103,15 @@ export default function AgregarService() {
       console.error(err);
     }
   };
-  const vehiculosFiltrados = vehiculos.filter((v) =>
-        v.patente.toLowerCase().includes(filtroPatente.toLowerCase())
-      );
 
+  const vehiculosFiltrados = vehiculos.filter((v) =>
+    v.patente.toLowerCase().includes(filtroPatente.toLowerCase())
+  );
+
+  const repuestosFiltrados = repuestos.filter((r) =>
+    r.nombre.toLowerCase().includes(filtroNombreRepuesto.toLowerCase()) &&
+    r.codigo.toLowerCase().includes(filtroCodigoRepuesto.toLowerCase())
+  );
 
   return (
     <div className="max-w-4xl mx-auto p-8">
@@ -118,7 +124,6 @@ export default function AgregarService() {
           onChange={(e) => setFiltroPatente(e.target.value)}
           className="w-full border p-2 rounded mb-2"
         />
-        
 
         <select
           name="vehiculoId"
@@ -192,8 +197,26 @@ export default function AgregarService() {
 
         {/* Sección de repuestos */}
         <div className="border p-4 rounded bg-gray-50">
-          <h2 className="font-semibold mb-2">Repuestos a utilizar</h2>
-          {repuestos.map((r) => (
+          <h2 className="font-semibold mb-4">Repuestos a utilizar</h2>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Filtrar por nombre"
+              value={filtroNombreRepuesto}
+              onChange={(e) => setFiltroNombreRepuesto(e.target.value)}
+              className="border p-2 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Filtrar por código"
+              value={filtroCodigoRepuesto}
+              onChange={(e) => setFiltroCodigoRepuesto(e.target.value)}
+              className="border p-2 rounded"
+            />
+          </div>
+
+          {repuestosFiltrados.map((r) => (
             <div key={r.id} className="flex items-center gap-4 mb-2">
               <label className="w-1/2">
                 {r.nombre} ({r.codigo}) - Stock: {r.cantidadDisponible}

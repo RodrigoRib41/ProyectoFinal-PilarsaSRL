@@ -16,6 +16,8 @@ export default function GestionRepuestos() {
   const [editMode, setEditMode] = useState<number | null>(null);
   const [nuevoRepuesto, setNuevoRepuesto] = useState<Partial<Repuesto>>({});
   const [editedRepuesto, setEditedRepuesto] = useState<Partial<Repuesto>>({});
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroCodigo, setFiltroCodigo] = useState("");
 
   const fetchRepuestos = async () => {
     try {
@@ -74,6 +76,11 @@ export default function GestionRepuestos() {
     }
   };
 
+  const repuestosFiltrados = repuestos.filter((r) =>
+    r.nombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
+    r.codigo.toLowerCase().includes(filtroCodigo.toLowerCase())
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Gestión de Repuestos</h1>
@@ -120,6 +127,24 @@ export default function GestionRepuestos() {
         </button>
       </div>
 
+      {/* Filtros */}
+      <div className="mb-4 grid grid-cols-2 gap-4">
+        <input
+          type="text"
+          placeholder="Buscar por nombre"
+          value={filtroNombre}
+          onChange={(e) => setFiltroNombre(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <input
+          type="text"
+          placeholder="Buscar por código"
+          value={filtroCodigo}
+          onChange={(e) => setFiltroCodigo(e.target.value)}
+          className="border p-2 rounded"
+        />
+      </div>
+
       {/* Tabla de repuestos */}
       <table className="w-full border text-sm">
         <thead className="bg-gray-200">
@@ -132,7 +157,7 @@ export default function GestionRepuestos() {
           </tr>
         </thead>
         <tbody>
-          {repuestos.map((r) => (
+          {repuestosFiltrados.map((r) => (
             <tr key={r.id}>
               {editMode === r.id ? (
                 <>
