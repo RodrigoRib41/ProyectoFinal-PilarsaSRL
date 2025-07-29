@@ -64,20 +64,27 @@ export default function BalancePage() {
     const agrupado: Record<string, { ingreso: number; egreso: number }> = {};
 
     data.forEach((item) => {
-      const fecha = new Date(item.fecha).toLocaleDateString('es-AR');
-      if (!agrupado[fecha]) {
-        agrupado[fecha] = { ingreso: 0, egreso: 0 };
+      const fechaISO = new Date(item.fecha).toISOString().split('T')[0];
+      if (!agrupado[fechaISO]) {
+        agrupado[fechaISO] = { ingreso: 0, egreso: 0 };
       }
       if (item.tipo === 'INGRESO') {
-        agrupado[fecha].ingreso += item.monto;
+        agrupado[fechaISO].ingreso += item.monto;
       } else {
-        agrupado[fecha].egreso += item.monto;
+        agrupado[fechaISO].egreso += item.monto;
       }
     });
 
     return Object.entries(agrupado)
-      .map(([fecha, valores]) => ({ fecha, ...valores }))
-      .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+      .map(([fechaISO, valores]) => ({
+        fecha: new Date(fechaISO).toLocaleDateString('es-AR'),
+        fechaOrden: fechaISO,
+        ...valores,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(a.fechaOrden).getTime() - new Date(b.fechaOrden).getTime()
+      );
   };
 
   return (
@@ -111,9 +118,10 @@ export default function BalancePage() {
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto border border-gray-300">
-          <thead className="bg-gray-100">
+      {/* Contenedor con scroll vertical */}
+      <div className="overflow-y-auto max-h-96 border border-gray-300 rounded">
+        <table className="w-full table-auto">
+          <thead className="bg-gray-100 sticky top-0">
             <tr>
               <th className="p-2 border">Fecha</th>
               <th className="p-2 border">Tipo</th>
@@ -127,22 +135,39 @@ export default function BalancePage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center p-4">Cargando...</td>
+                <td colSpan={7} className="text-center p-4">
+                  Cargando...
+                </td>
               </tr>
             ) : balance.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center p-4">Sin registros</td>
+                <td colSpan={7} className="text-center p-4">
+                  Sin registros
+                </td>
               </tr>
             ) : (
               balance.map((item) => (
-                <tr key={item.id} className={item.tipo === 'EGRESO' ? 'bg-red-50' : 'bg-green-50'}>
-                  <td className="p-2 border">{new Date(item.fecha).toLocaleDateString()}</td>
-                  <td className="p-2 border font-semibold text-center">{item.tipo}</td>
+                <tr
+                  key={item.id}
+                  className={
+                    item.tipo === 'EGRESO' ? 'bg-red-50' : 'bg-green-50'
+                  }
+                >
+                  <td className="p-2 border">
+                    {new Date(item.fecha).toLocaleDateString('es-AR')}
+                  </td>
+                  <td className="p-2 border font-semibold text-center">
+                    {item.tipo}
+                  </td>
                   <td className="p-2 border">{item.marca}</td>
                   <td className="p-2 border">{item.modelo}</td>
                   <td className="p-2 border text-center">{item.anio}</td>
-                  <td className="p-2 border text-right">{formatoMiles(item.kilometros)}</td>
-                  <td className="p-2 border text-right">${formatoMiles(item.monto)}</td>
+                  <td className="p-2 border text-right">
+                    {formatoMiles(item.kilometros)}
+                  </td>
+                  <td className="p-2 border text-right">
+                    ${formatoMiles(item.monto)}
+                  </td>
                 </tr>
               ))
             )}
@@ -151,8 +176,14 @@ export default function BalancePage() {
       </div>
 
       <div className="mt-6 text-right space-y-1">
-        <p><span className="font-semibold">Total Ingresos:</span> ${formatoMiles(totalIngresos)}</p>
-        <p><span className="font-semibold">Total Egresos:</span> ${formatoMiles(totalEgresos)}</p>
+        <p>
+          <span className="font-semibold">Total Ingresos:</span> $
+          {formatoMiles(totalIngresos)}
+        </p>
+        <p>
+          <span className="font-semibold">Total Egresos:</span> $
+          {formatoMiles(totalEgresos)}
+        </p>
         <p className="text-lg font-bold">
           Balance Neto: ${formatoMiles(totalIngresos - totalEgresos)}
         </p>
@@ -170,8 +201,18 @@ export default function BalancePage() {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="ingreso" stroke="#22c55e" name="Ingresos" />
-            <Line type="monotone" dataKey="egreso" stroke="#ef4444" name="Egresos" />
+            <Line
+              type="monotone"
+              dataKey="ingreso"
+              stroke="#22c55e"
+              name="Ingresos"
+            />
+            <Line
+              type="monotone"
+              dataKey="egreso"
+              stroke="#ef4444"
+              name="Egresos"
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

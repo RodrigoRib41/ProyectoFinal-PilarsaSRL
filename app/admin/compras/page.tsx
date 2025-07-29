@@ -29,7 +29,10 @@ export default function RegistrarEgresoPage() {
 
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [compraAEliminar, setCompraAEliminar] = useState<{ id: number; fecha: string } | null>(null);
 
   const [compras, setCompras] = useState<BalanceItem[]>([]);
   const [loadingCompras, setLoadingCompras] = useState(false);
@@ -57,7 +60,7 @@ export default function RegistrarEgresoPage() {
 
     if (!marca.trim() || !modelo.trim() || !anio.trim() || !kilometros.trim() || !precioCompra.trim()) {
       setMensaje('Por favor, complete todos los campos.');
-      setModalVisible(true);
+      setShowError(true);
       return;
     }
 
@@ -67,19 +70,19 @@ export default function RegistrarEgresoPage() {
 
     if (isNaN(anioNum) || anioNum < 1900 || anioNum > new Date().getFullYear()) {
       setMensaje('Ingrese un año válido.');
-      setModalVisible(true);
+      setShowError(true);
       return;
     }
 
     if (isNaN(kmNum) || kmNum < 0) {
       setMensaje('Ingrese kilómetros válidos.');
-      setModalVisible(true);
+      setShowError(true);
       return;
     }
 
     if (isNaN(precioNum) || precioNum <= 0) {
       setMensaje('Ingrese un precio de compra válido.');
-      setModalVisible(true);
+      setShowError(true);
       return;
     }
 
@@ -95,7 +98,7 @@ export default function RegistrarEgresoPage() {
       });
 
       setMensaje('Egreso registrado correctamente.');
-      setModalVisible(true);
+      setShowSuccess(true);
 
       setMarca('');
       setModelo('');
@@ -107,36 +110,42 @@ export default function RegistrarEgresoPage() {
     } catch (error) {
       console.error('Error al registrar egreso:', error);
       setMensaje('Error al registrar el egreso.');
-      setModalVisible(true);
+      setShowError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const eliminarCompra = async (id: number, fecha: string) => {
+  const confirmarEliminacion = (id: number, fecha: string) => {
     const fechaCompra = new Date(fecha);
     const unaSemanaAtras = new Date();
     unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
 
     if (fechaCompra < unaSemanaAtras) {
       setMensaje('Solo se pueden eliminar registros de la última semana.');
-      setModalVisible(true);
+      setShowError(true);
       return;
     }
 
-    if (!confirm('¿Confirma que desea eliminar este registro?')) {
-      return;
-    }
+    setCompraAEliminar({ id, fecha });
+    setShowConfirm(true);
+  };
+
+  const eliminarCompra = async () => {
+    if (!compraAEliminar) return;
 
     try {
-      await axios.delete('/api/balance/registrar-compra', { params: { id } });
+      await axios.delete('/api/balance/registrar-compra', { params: { id: compraAEliminar.id } });
       setMensaje('Registro eliminado correctamente.');
-      setModalVisible(true);
+      setShowSuccess(true);
       fetchCompras();
     } catch (error) {
       console.error('Error al eliminar registro:', error);
       setMensaje('Error al eliminar el registro.');
-      setModalVisible(true);
+      setShowError(true);
+    } finally {
+      setShowConfirm(false);
+      setCompraAEliminar(null);
     }
   };
 
@@ -258,7 +267,7 @@ export default function RegistrarEgresoPage() {
                     <td className="border p-2 text-right">${compra.monto.toLocaleString('es-AR')}</td>
                     <td className="border p-2 text-center">
                       <button
-                        onClick={() => eliminarCompra(compra.id, compra.fecha)}
+                        onClick={() => confirmarEliminacion(compra.id, compra.fecha)}
                         disabled={!puedeEliminar}
                         className={`px-3 py-1 rounded text-white ${
                           puedeEliminar ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
@@ -275,16 +284,61 @@ export default function RegistrarEgresoPage() {
         )}
       </div>
 
-      {modalVisible && (
-        <div className="fixed top-5 right-5 z-50">
-          <div className="bg-white/90 backdrop-blur-md text-black rounded shadow-lg p-4 border border-gray-300">
-            <p className="mb-2">{mensaje}</p>
-            <button
-              onClick={() => setModalVisible(false)}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-            >
-              OK
-            </button>
+      {/* Modal de éxito */}
+      {showSuccess && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowError(false)}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación */}
+      {showConfirm && compraAEliminar && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">
+              ¿Estás seguro de que deseas eliminar este registro?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={eliminarCompra}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="bg-gray-500 text-white p-2 rounded"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

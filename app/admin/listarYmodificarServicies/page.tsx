@@ -33,6 +33,13 @@ export default function ListarYModificarServices() {
   const [patenteFilter, setPatenteFilter] = useState("");
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
+  // Estados para modales
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [serviceToDelete, setServiceToDelete] = useState<number | null>(null);
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -43,6 +50,8 @@ export default function ListarYModificarServices() {
       setServices(res.data);
     } catch (err) {
       console.error("Error al obtener services", err);
+      setMensaje("Error al cargar los services");
+      setShowError(true);
     }
   };
 
@@ -61,22 +70,36 @@ export default function ListarYModificarServices() {
   const handleSave = async (id: number) => {
     try {
       await axios.put(`/api/services/${id}`, editedService);
-      alert("Service modificado");
+      setMensaje("Service modificado con éxito");
+      setShowSuccess(true);
       setEditMode(null);
       fetchServices();
     } catch (err) {
       console.error("Error al modificar service", err);
+      setMensaje("Error al modificar el service");
+      setShowError(true);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("¿Seguro que querés eliminar este service?")) {
+  const handleDeleteClick = (id: number) => {
+    setServiceToDelete(id);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (serviceToDelete !== null) {
       try {
-        await axios.delete(`/api/services/${id}`);
-        alert("Service eliminado");
+        await axios.delete(`/api/services/${serviceToDelete}`);
+        setMensaje("Service eliminado con éxito");
+        setShowSuccess(true);
         fetchServices();
       } catch (err) {
         console.error("Error al eliminar service", err);
+        setMensaje("Error al eliminar el service");
+        setShowError(true);
+      } finally {
+        setShowConfirm(false);
+        setServiceToDelete(null);
       }
     }
   };
@@ -211,7 +234,7 @@ export default function ListarYModificarServices() {
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(s.id)}
+                        onClick={() => handleDeleteClick(s.id)}
                         className="bg-red-500 text-white px-2 py-1 rounded"
                       >
                         Eliminar
@@ -250,6 +273,65 @@ export default function ListarYModificarServices() {
           ))}
         </tbody>
       </table>
+
+      {/* Modal de éxito */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowError(false)}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para eliminar */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">
+              ¿Seguro que querés eliminar este service?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={confirmDelete}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="bg-gray-400 text-white p-2 rounded"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

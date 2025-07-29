@@ -24,9 +24,22 @@ export default function ListarVehiculos() {
   })
   const [patenteFilter, setPatenteFilter] = useState("")
 
+  // Estados para modales
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [showError, setShowError] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [mensaje, setMensaje] = useState("")
+  const [vehiculoAEliminar, setVehiculoAEliminar] = useState<number | null>(null)
+
   const obtenerVehiculos = async () => {
-    const res = await axios.get("/api/vehiculos")
-    setVehiculos(res.data)
+    try {
+      const res = await axios.get("/api/vehiculos")
+      setVehiculos(res.data)
+    } catch (err) {
+      console.error("Error al obtener vehículos", err)
+      setMensaje("Error al cargar los vehículos")
+      setShowError(true)
+    }
   }
 
   useEffect(() => {
@@ -37,9 +50,27 @@ export default function ListarVehiculos() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleEliminar = async (id: number) => {
-    await axios.delete(`/api/vehiculos/${id}`)
-    obtenerVehiculos()
+  const solicitarConfirmacion = (id: number) => {
+    setVehiculoAEliminar(id)
+    setShowConfirm(true)
+  }
+
+  const confirmarEliminar = async () => {
+    if (!vehiculoAEliminar) return
+
+    try {
+      await axios.delete(`/api/vehiculos/${vehiculoAEliminar}`)
+      setMensaje("Vehículo eliminado con éxito")
+      setShowSuccess(true)
+      obtenerVehiculos()
+    } catch (err) {
+      console.error("Error al eliminar vehículo", err)
+      setMensaje("Hubo un error al eliminar el vehículo")
+      setShowError(true)
+    } finally {
+      setShowConfirm(false)
+      setVehiculoAEliminar(null)
+    }
   }
 
   const handleEditar = (vehiculo: Vehiculo) => {
@@ -54,16 +85,23 @@ export default function ListarVehiculos() {
   }
 
   const handleGuardar = async (id: number) => {
-    await axios.put(`/api/vehiculos/${id}`, {
-      ...form,
-      año: Number(form.año),
-      kilometros: Number(form.kilometros)
-    })
-    setEditando(null)
-    obtenerVehiculos()
+    try {
+      await axios.put(`/api/vehiculos/${id}`, {
+        ...form,
+        año: Number(form.año),
+        kilometros: Number(form.kilometros)
+      })
+      setEditando(null)
+      setMensaje("Vehículo modificado con éxito")
+      setShowSuccess(true)
+      obtenerVehiculos()
+    } catch (err) {
+      console.error("Error al modificar vehículo", err)
+      setMensaje("Hubo un error al modificar el vehículo")
+      setShowError(true)
+    }
   }
 
-  // Filtrar vehículos por patente
   const filteredVehiculos = vehiculos.filter((v) =>
     v.patente.toLowerCase().includes(patenteFilter.toLowerCase())
   )
@@ -147,7 +185,7 @@ export default function ListarVehiculos() {
                   Modificar
                 </button>
                 <button
-                  onClick={() => handleEliminar(v.id)}
+                  onClick={() => solicitarConfirmacion(v.id)}
                   className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
                 >
                   Eliminar
@@ -157,7 +195,63 @@ export default function ListarVehiculos() {
           )}
         </div>
       ))}
+
+      {/* Modal de confirmación */}
+      {showConfirm && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">¿Estás seguro de que deseas eliminar este vehículo?</p>
+            <div className="flex justify-center mt-4 gap-4">
+              <button
+                onClick={confirmarEliminar}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="bg-gray-400 text-white p-2 rounded"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de éxito */}
+      {showSuccess && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowError(false)}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-

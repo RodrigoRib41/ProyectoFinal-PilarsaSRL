@@ -19,12 +19,21 @@ export default function GestionRepuestos() {
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroCodigo, setFiltroCodigo] = useState("");
 
+  // Estados para modales
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [repuestoToDelete, setRepuestoToDelete] = useState<number | null>(null);
+
   const fetchRepuestos = async () => {
     try {
       const res = await axios.get("/api/repuestos");
       setRepuestos(res.data);
     } catch (err) {
       console.error("Error al obtener repuestos", err);
+      setMensaje("Error al cargar los repuestos");
+      setShowError(true);
     }
   };
 
@@ -44,9 +53,13 @@ export default function GestionRepuestos() {
     try {
       await axios.post("/api/repuestos", nuevoRepuesto);
       setNuevoRepuesto({});
+      setMensaje("Repuesto agregado con éxito");
+      setShowSuccess(true);
       fetchRepuestos();
     } catch (err) {
       console.error("Error al agregar repuesto", err);
+      setMensaje("Error al agregar repuesto");
+      setShowError(true);
     }
   };
 
@@ -59,19 +72,35 @@ export default function GestionRepuestos() {
     try {
       await axios.put(`/api/repuestos/${id}`, editedRepuesto);
       setEditMode(null);
+      setMensaje("Repuesto modificado con éxito");
+      setShowSuccess(true);
       fetchRepuestos();
     } catch (err) {
       console.error("Error al modificar repuesto", err);
+      setMensaje("Error al modificar repuesto");
+      setShowError(true);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("¿Seguro que querés eliminar este repuesto?")) {
+  const handleDeleteClick = (id: number) => {
+    setRepuestoToDelete(id);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (repuestoToDelete !== null) {
       try {
-        await axios.delete(`/api/repuestos/${id}`);
+        await axios.delete(`/api/repuestos/${repuestoToDelete}`);
+        setMensaje("Repuesto eliminado con éxito");
+        setShowSuccess(true);
         fetchRepuestos();
       } catch (err) {
         console.error("Error al eliminar repuesto", err);
+        setMensaje("Error al eliminar repuesto");
+        setShowError(true);
+      } finally {
+        setShowConfirm(false);
+        setRepuestoToDelete(null);
       }
     }
   };
@@ -223,7 +252,7 @@ export default function GestionRepuestos() {
                       Editar
                     </button>
                     <button
-                      onClick={() => handleDelete(r.id)}
+                      onClick={() => handleDeleteClick(r.id)}
                       className="bg-red-500 text-white px-2 py-1 rounded"
                     >
                       Eliminar
@@ -235,6 +264,65 @@ export default function GestionRepuestos() {
           ))}
         </tbody>
       </table>
+
+      {/* Modal de éxito */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showError && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">{mensaje}</p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowError(false)}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-black font-bold">
+              ¿Seguro que querés eliminar este repuesto?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={confirmDelete}
+                className="bg-red-500 text-white p-2 rounded"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="bg-gray-400 text-white p-2 rounded"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
