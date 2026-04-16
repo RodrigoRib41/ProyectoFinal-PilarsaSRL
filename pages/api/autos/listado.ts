@@ -1,24 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/db';
+import { createApiHandler, sendSuccess } from "@/lib/core/http";
+import { requireApiRoles } from "@/lib/server/auth";
+import { listAutosForSales } from "@/lib/server/modules/autos";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Método no permitido' });
-
-  try {
-    const autos = await db.auto.findMany({
-      select: {
-        id: true,
-        marca: true,
-        modelo: true,
-        año: true,
-        kilometros: true,
-        precio: true,
-      },
-    });
-
-    return res.status(200).json(autos);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al obtener autos' });
-  }
-}
+export default createApiHandler({
+  async GET(req, res) {
+    await requireApiRoles(req, ["FINANZAS", "SUPERADMIN"]);
+    const autos = await listAutosForSales();
+    return sendSuccess(res, autos);
+  },
+});

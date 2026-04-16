@@ -22,10 +22,10 @@ export default function ModelosSection() {
         Descubrí tu próximo BAIC
       </h2>
 
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 justify-center">
+      <div className="grid grid-cols-2 gap-4 justify-center sm:grid-cols-3 sm:gap-6 md:gap-8">
         {modelos.map((modelo, index) => (
           <Link key={index} href={modelo.link} className="group flex flex-col items-center cursor-pointer">
-            <div className="relative w-[100px] h-[100px] sm:w-[180px] sm:h-[180px] md:w-[200px] md:h-[200px] lg:w-[220px] lg:h-[220px] overflow-visible">
+            <div className="relative h-[100px] w-[100px] overflow-visible sm:h-[180px] sm:w-[180px] md:h-[200px] md:w-[200px] lg:h-[220px] lg:w-[220px]">
               <Image
                 src={modelo.img}
                 alt={modelo.nombre}
@@ -33,7 +33,7 @@ export default function ModelosSection() {
                 className="object-contain transition-transform duration-300 group-hover:scale-110"
               />
             </div>
-            <p className={`${poppins.className} mt-2 text-sm sm:text-base md:text-lg font-semibold`}>
+            <p className={`${poppins.className} mt-2 text-center text-sm font-semibold sm:text-base md:text-lg`}>
               {modelo.nombre}
             </p>
           </Link>

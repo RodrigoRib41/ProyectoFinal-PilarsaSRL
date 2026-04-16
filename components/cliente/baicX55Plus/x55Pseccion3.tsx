@@ -1,42 +1,45 @@
 "use client";
-import Image from "next/image";
+
 import { Poppins } from "next/font/google";
+import Image from "next/image";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const items = [
   {
     src: "/modelos/x55Plus/x55PlusDisenio.jpg",
-    label: "Diseño",
+    label: "Diseno",
     description:
-      "El modelado de este vehículo se adhiere perfectamente al lenguaje que caracteriza a la marca y que es mundialmente conocido como “Capital Beauty”.",
+      "El modelado del vehiculo sigue el lenguaje visual de la marca y su identidad Capital Beauty.",
   },
   {
     src: "/modelos/x55Plus/x55PlusFaros.jpg",
-    label: "Faros Traseros",
+    label: "Faros traseros",
     description:
-      "El diseño se enmarca dentro del concepto Digital Matrix, delineando lo que la marca define como “Kylin Wing”.",
+      "El diseno se enmarca dentro del concepto Digital Matrix y define el estilo Kylin Wing.",
   },
   {
     src: "/modelos/x55Plus/x55PlusLlantas.jpg",
     label: "Llantas",
     description:
-      "Su tamaño de 19 pulgadas está acompañado de un exclusivo diseño que combina líneas delgadas y delicadas, con detalles en color negro brillante, proporcionando gran personalidad.",
+      "Las llantas de 19 pulgadas combinan lineas delgadas y detalles en negro brillante para una presencia mas deportiva.",
   },
   {
     src: "/modelos/x55Plus/x55PlusTrasero.jpg",
-    label: "Perfil Lateral",
+    label: "Perfil lateral",
     description:
-      "El diseño de escape cuádruple y bilateral resalta la dinámica y la potencia del X55 Plus.",
+      "El escape cuadruple bilateral resalta la dinamica y la potencia visual del X55 Plus.",
   },
 ];
 
 export default function GaleriaInteractiva() {
   return (
-    <section className={`${poppins.className} w-full px-4 py-12 grid grid-cols-2 grid-rows-2 gap-6 lg:grid-cols-4 lg:grid-rows-1`}>
-      {items.map((item, idx) => (
+    <section
+      className={`${poppins.className} grid w-full grid-cols-1 gap-6 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4`}
+    >
+      {items.map((item) => (
         <div
-          key={idx}
+          key={item.label}
           className="relative group overflow-hidden rounded-xl shadow-lg"
         >
           <Image
@@ -44,22 +47,16 @@ export default function GaleriaInteractiva() {
             alt={item.label}
             width={700}
             height={500}
-            className="object-cover w-full h-[280px] sm:h-[300px] md:h-[340px] lg:h-[400px] transition-transform duration-300 group-hover:scale-105"
+            className="h-[280px] w-full object-cover transition-transform duration-300 lg:group-hover:scale-105 sm:h-[300px] md:h-[340px] lg:h-[400px]"
           />
 
-          {/* Título siempre visible */}
-          <div className="absolute top-2 left-2 bg-black/70 text-white px-3 py-1 rounded-md text-sm md:text-base font-semibold z-10">
+          <div className="absolute left-2 top-2 z-10 rounded-md bg-black/70 px-3 py-1 text-sm font-semibold text-white md:text-base">
             {item.label}
           </div>
 
-          {/* Descripción con hover */}
-          {item.description && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center text-center px-4">
-              <p className="text-white text-sm md:text-base">
-                {item.description}
-              </p>
-            </div>
-          )}
+          <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-black/55 p-4 text-left text-white backdrop-blur-[2px] lg:inset-0 lg:flex lg:items-center lg:justify-center lg:rounded-none lg:bg-black/40 lg:px-4 lg:text-center lg:opacity-0 lg:backdrop-blur-sm lg:transition-opacity lg:duration-300 lg:group-hover:opacity-100">
+            <p className="text-sm leading-relaxed md:text-base">{item.description}</p>
+          </div>
         </div>
       ))}
     </section>

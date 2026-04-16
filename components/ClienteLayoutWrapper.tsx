@@ -12,13 +12,10 @@ export default function ClienteLayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
-  // Excluye layout si es /admin o /auth
   const isAdminOrAuth = pathname?.startsWith("/admin") || pathname?.startsWith("/auth");
 
-
   if (isAdminOrAuth) {
-    return <>{children}</>; // Sin layout
+    return <>{children}</>;
   }
 
   return (
@@ -27,11 +24,11 @@ export default function ClienteLayoutWrapper({
       <AnimatePresence mode="wait">
         <motion.main
           key={pathname}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="pt-20"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.28, ease: "easeOut" }}
+        className="min-h-screen overflow-x-hidden pt-24 md:pt-28"
         >
           {children}
         </motion.main>

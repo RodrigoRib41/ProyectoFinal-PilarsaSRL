@@ -1,45 +1,59 @@
-import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { authOptions } from "@/lib/auth/options";
+import { AppError, getErrorPayload } from "@/lib/core/api-errors";
+import { registerUserSchema } from "@/lib/domain/schemas";
+import { wrapInitialPassword } from "@/lib/auth/password-state";
+import { assertSuperAdminSession } from "@/lib/auth/root-admin";
 
-interface UserRequest {
-  username: string;
-  password: string;
-  role: "STOCK" | "SERVICES" | "FINANZAS" | "SUPERADMIN";
-}
-
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: Request) {
   try {
-    const data: UserRequest = await request.json();
+    const session = await getServerSession(authOptions);
+    assertSuperAdminSession(session);
+
+    const data = registerUserSchema.parse(await request.json());
 
     const userFound = await db.user.findUnique({
       where: { username: data.username },
     });
 
     if (userFound) {
-      return NextResponse.json(
-        { message: "Username already exists" },
-        { status: 400 }
-      );
+      throw new AppError("El usuario ya existe.", 409);
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    const newUser = await db.user.create({
+    const password = wrapInitialPassword(await bcrypt.hash(data.password, 10));
+    const user = await db.user.create({
       data: {
         username: data.username,
-        password: hashedPassword,
-        role: data.role, // ✅ AQUÍ se guarda el rol recibido
+        password,
+        role: data.role,
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...user } = newUser;
-
-    return NextResponse.json(user);
-  } catch (error) {
     return NextResponse.json(
-      { message: (error as Error).message },
-      { status: 500 }
+      {
+        success: true,
+        data: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          mustChangePassword: true,
+          createdAt: user.createdAt,
+        },
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    const payload = getErrorPayload(error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: payload.message,
+        details: payload.details,
+      },
+      { status: payload.statusCode },
     );
   }
 }

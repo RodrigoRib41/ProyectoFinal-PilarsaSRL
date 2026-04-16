@@ -1,24 +1,14 @@
-import U5PlusSection1  from "@/components/cliente/baicU5PLUS/u5seccion1"
-import U5PlusSection2  from "@/components/cliente/baicU5PLUS/u5seccion2"
-import U5PlusSection3  from "@/components/cliente/baicU5PLUS/u5seccion3"
-import U5PlusSection4  from "@/components/cliente/baicU5PLUS/u5seccion4"
-import U5PlusSection5  from "@/components/cliente/baicU5PLUS/u5seccion5"
-import U5PlusSection6  from "@/components/cliente/baicU5PLUS/u5seccion6"
-import U5PlusSection7  from "@/components/cliente/baicU5PLUS/u5seccion7"
-import U5PlusSection8  from "@/components/cliente/baicU5PLUS/u5seccion8"
+import type { Metadata } from "next";
+import { BaicModelPage } from "@/components/cliente/catalog/BaicModelPage";
+import { baicModelPages } from "@/lib/baic-model-pages";
 
-export default function BaicU5PLUSHero() {
-    return (
-      <div>
- 
-            <U5PlusSection1 />
-            <U5PlusSection2 />
-            <U5PlusSection3 />
-            <U5PlusSection4 />
-            <U5PlusSection5 />
-            <U5PlusSection6 />
-            <U5PlusSection7 />
-            <U5PlusSection8 />
+const model = baicModelPages.baicU5PLUS;
 
-    </div>
-    )}
+export const metadata: Metadata = {
+  title: `BAIC ${model.name} | Pilarsa SRL`,
+  description: model.description,
+};
+
+export default function BaicU5PlusPage() {
+  return <BaicModelPage model={model} />;
+}

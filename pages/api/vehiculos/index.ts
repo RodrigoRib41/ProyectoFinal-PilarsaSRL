@@ -1,34 +1,18 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { db } from '@/lib/db'
-import { Prisma } from '@prisma/client'
+import { createApiHandler, parseBody, sendSuccess } from "@/lib/core/http";
+import { vehicleCreateSchema } from "@/lib/domain/schemas";
+import { requireApiRoles } from "@/lib/server/auth";
+import { createVehiculo, listVehiculos } from "@/lib/server/modules/vehiculos";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    try {
-      const vehiculos = await db.vehiculo.findMany()
-      return res.status(200).json(vehiculos)
-    } catch (err) {
-      console.error("Error al obtener vehículos:", err)
-      return res.status(500).json({ message: "Error al obtener vehículos" })
-    }
-  }
-
-  if (req.method === "POST") {
-    const { patente, marca, version, año, kilometros } = req.body
-
-    try {
-      const vehiculo = await db.vehiculo.create({
-        data: { patente, marca, version, año, kilometros }
-      })
-      return res.status(201).json(vehiculo)
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-        return res.status(409).json({ message: "La patente ya está registrada en la base de datos." })
-      }
-      console.error("Error al crear vehículo:", err)
-      return res.status(500).json({ message: "Error interno al crear el vehículo." })
-    }
-  }
-
-  return res.status(405).json({ message: "Método no permitido" })
-}
+export default createApiHandler({
+  async GET(req, res) {
+    await requireApiRoles(req, ["SERVICES", "SUPERADMIN"]);
+    const vehiculos = await listVehiculos();
+    return sendSuccess(res, vehiculos);
+  },
+  async POST(req, res) {
+    await requireApiRoles(req, ["SERVICES", "SUPERADMIN"]);
+    const payload = parseBody(vehicleCreateSchema, req);
+    const vehiculo = await createVehiculo(payload);
+    return sendSuccess(res, vehiculo, { status: 201 });
+  },
+});

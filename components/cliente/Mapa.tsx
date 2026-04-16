@@ -31,11 +31,11 @@ const ubicaciones: Ubicacion[] = [
 
 const Mapa: FC = () => {
   return (
-    <div className="w-full h-[500px] rounded-xl overflow-hidden shadow-md">
+    <div className="h-[320px] w-full overflow-hidden rounded-xl shadow-md sm:h-[420px] md:h-[500px]">
       <MapContainer
         center={[-32.07130923851953, -60.636502852664734]}
         zoom={15}
-        scrollWheelZoom={true}
+        scrollWheelZoom={false}
         className="w-full h-full z-0"
       >
         <TileLayer

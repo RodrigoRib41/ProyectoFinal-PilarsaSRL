@@ -21,7 +21,7 @@ export default function HeroBaic() {
 
       {/* Contenido encima */}
       <div
-       className={`${poppins.className} absolute top-4 left-10 max-w-[50%] z-20 text-white`}
+       className={`${poppins.className} absolute left-4 right-4 top-4 z-20 max-w-none rounded-2xl bg-black/45 p-3 text-white backdrop-blur-[2px] sm:right-auto sm:max-w-[70%] sm:p-4 lg:left-10 lg:right-auto lg:max-w-[50%] lg:bg-transparent lg:p-0 lg:backdrop-blur-none`}
       >
             <h1 className="text-base md:text-4xl font-semibold mb-2">
                 Faros led de última generación

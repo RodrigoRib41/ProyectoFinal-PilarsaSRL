@@ -21,7 +21,7 @@ export default function HeroBaic() {
 
       {/* Contenido encima */}
       <div
-        className={`${poppins.className} absolute top-4 left-10 text-left max-w-xs md:max-w-sm z-20 text-white`}
+        className={`${poppins.className} absolute left-4 right-4 top-4 z-20 max-w-none rounded-2xl bg-black/45 p-3 text-left text-white backdrop-blur-[2px] sm:right-auto sm:max-w-sm sm:p-4 lg:left-10 lg:bg-transparent lg:p-0 lg:backdrop-blur-none`}
       >
             <h1 className="text-base md:text-4xl font-semibold mb-2">
                 TECNOLOGÍA, DISEÑO Y UN AMPLIO ESPACIO INTERIOR

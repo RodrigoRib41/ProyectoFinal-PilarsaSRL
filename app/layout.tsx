@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { IBM_Plex_Mono, Sora } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import ClienteLayoutWrapper from "@/components/ClienteLayoutWrapper";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "PilarsaSRL",
-  description: "Página Web PilarsaSRL",
+  title: "Pilarsa SRL",
+  description: "Concesionario y centro postventa BAIC en Entre Rios.",
 };
 
 export default function RootLayout({
@@ -26,13 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        <link rel="icon" href="/logoVarios/logoPilarsa.png" type="image/png" />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NextTopLoader color="#000" />
+      <body className={`${sora.variable} ${plexMono.variable}`}>
+        <NextTopLoader color="#06b6d4" showSpinner={false} />
         <ClienteLayoutWrapper>{children}</ClienteLayoutWrapper>
       </body>
     </html>

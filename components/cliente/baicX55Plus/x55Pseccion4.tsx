@@ -1,32 +1,32 @@
-import Image from "next/image";
 import { Poppins } from "next/font/google";
+import Image from "next/image";
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] }); 
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 export default function ImagenHover() {
   return (
-    <div className={`${poppins.className} relative group w-full h-[400px] sm:h-[600px] md:h-[700px] overflow-hidden`}>
-      {/* Imagen de fondo */}
+    <div
+      className={`${poppins.className} relative group h-[400px] w-full overflow-hidden sm:h-[600px] md:h-[700px]`}
+    >
       <Image
-        src="/modelos/x55Plus/X55PlusInterior.webp" // Reemplazá con tu ruta
-        alt="Diseño X55 Plus"
+        src="/modelos/x55Plus/X55PlusInterior.webp"
+        alt="Interior X55 Plus"
         fill
-        className="object-cover transition duration-700 ease-in-out group-hover:blur-sm"
+        className="object-cover transition duration-700 ease-in-out lg:group-hover:blur-sm"
       />
 
-      {/* Capa oscura opcional */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/25" />
 
-      {/* Título arriba a la derecha */}
-      <div className="absolute top-4 left-4 bg-black text-white text-sm font-semibold px-4 py-2 rounded-md shadow-md z-10">
-        Interior
+      <div className="absolute left-4 right-4 top-4 z-10 lg:right-auto">
+        <div className="inline-flex rounded-full bg-black/75 px-4 py-2 text-sm font-semibold text-white shadow-md">
+          Interior
+        </div>
       </div>
 
-      {/* Subtítulo centrado que aparece al hacer hover */}
-      <div className="absolute inset-0 flex items-center justify-center text-white text-center transition-all duration-700 opacity-0 group-hover:opacity-100">
-        <div className="flex flex-col items-center">
-          <p className="mt-2 text-lg sm:text-xl">La calidad de los materiales y el aprovechamiento al máximo del espacio interior, garantizan que cada centímetro esté optimizado para ofrecer las mejores soluciones de almacenamiento y un inmejorable confort tanto para el conductor como sus acompañantes.</p>
-        </div>
+      <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-black/55 p-4 text-white backdrop-blur-[2px] lg:inset-0 lg:flex lg:items-center lg:justify-center lg:rounded-none lg:bg-black/40 lg:px-8 lg:py-6 lg:text-center lg:opacity-0 lg:backdrop-blur-sm lg:transition-all lg:duration-700 lg:group-hover:opacity-100">
+        <p className="text-sm leading-relaxed sm:text-base lg:text-lg xl:text-xl">
+          La calidad de los materiales y el aprovechamiento del espacio interior suman almacenamiento util y un confort superior.
+        </p>
       </div>
     </div>
   );

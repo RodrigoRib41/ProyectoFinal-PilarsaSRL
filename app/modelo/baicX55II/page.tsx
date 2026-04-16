@@ -1,23 +1,14 @@
-import X55section1 from "@/components/cliente/baicX55/x55seccion1"
-import X55section2 from "@/components/cliente/baicX55/x55seccion2"
-import X55section3 from "@/components/cliente/baicX55/x55seccion3"
-import X55section4 from "@/components/cliente/baicX55/x55seccion4"
-import X55section5 from "@/components/cliente/baicX55/x55seccion5"
-import X55section6 from "@/components/cliente/baicX55/x55seccion6"
-import X55section7 from "@/components/cliente/baicX55/x55seccion7"
+import type { Metadata } from "next";
+import { BaicModelPage } from "@/components/cliente/catalog/BaicModelPage";
+import { baicModelPages } from "@/lib/baic-model-pages";
 
+const model = baicModelPages.baicX55II;
 
-export default function BaicX55IIHero() {
-  return (
-    <div>
-          <X55section1 />
-          <X55section2 />
-          <X55section3 />
-          <X55section4 />
-          <X55section5 />
-          <X55section6 />
-          <X55section7 />
-    </div>
-   
-);
+export const metadata: Metadata = {
+  title: `BAIC ${model.name} | Pilarsa SRL`,
+  description: model.description,
+};
+
+export default function BaicX55IIPage() {
+  return <BaicModelPage model={model} />;
 }

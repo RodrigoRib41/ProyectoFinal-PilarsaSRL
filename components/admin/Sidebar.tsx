@@ -1,142 +1,173 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useState, useEffect, useRef } from "react";
-import { Menu, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { adminNavigation } from "@/lib/site-config";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
+function cx(...values: Array<string | false | null | undefined>) {
+  return values.filter(Boolean).join(" ");
+}
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
-  const closeSidebar = () => setIsOpen(false);
+export default function Sidebar({ isSuperAdmin }: { isSuperAdmin: boolean }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  // Cerrar si clickean fuera del sidebar
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        closeSidebar();
-      }
-    }
+    setOpen(false);
+  }, [pathname]);
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [open]);
+
+  const sections = useMemo(
+    () =>
+      adminNavigation
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => !item.superAdminOnly || isSuperAdmin),
+        }))
+        .filter((section) => section.items.length > 0),
+    [isSuperAdmin],
+  );
 
   return (
     <>
-      {/* Botón hamburguesa (arriba a la derecha en mobile) */}
       <button
-        className="fixed top-4 left-4 z-50 md:hidden p-2 bg-gray-800 text-white rounded"
-        onClick={toggleSidebar}
+        type="button"
+        onClick={() => setOpen(true)}
+        className="fixed left-3 top-3 z-40 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-slate-950 text-white shadow-2xl sm:left-4 sm:top-4 md:hidden"
+        aria-label="Abrir menu administrativo"
+        aria-expanded={open}
       >
-        <Menu size={24} />
+        <Menu size={20} />
       </button>
 
-      {/* Backdrop oscuro al abrir menú en mobile */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
-      )}
+      {open ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-slate-950/55 backdrop-blur-sm md:hidden"
+          onClick={() => setOpen(false)}
+          aria-label="Cerrar menu"
+        />
+      ) : null}
 
-      {/* Sidebar */}
       <aside
-        ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full w-56 bg-gray-800 text-white p-4 flex flex-col justify-between z-50
-          transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:relative md:translate-x-0 md:flex md:w-56 md:min-h-screen`}
+        className={cx(
+          "fixed inset-y-0 left-0 z-40 flex w-[min(18rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] flex-col overflow-hidden border-r border-white/10 bg-slate-950 text-slate-100 shadow-[0_32px_120px_rgba(15,23,42,0.45)] transition-transform duration-300 md:relative md:w-[17rem] md:max-w-none md:translate-x-0 lg:w-[18rem]",
+          open ? "translate-x-0" : "-translate-x-full",
+        )}
       >
-        <div>
-          {/* Cerrar botón (solo visible en mobile) */}
-          <div className="flex justify-between items-center mb-6 md:hidden">
-            <div className="flex items-center space-x-2">
-              <Image src="/logoVarios/logoPilarsa.png" alt="Logo" width={42} height={30} />
-              <span className="text-lg font-semibold">Pilarsa Admin</span>
-            </div>
-            <button onClick={closeSidebar} className="text-white">
-              <X size={24} />
+        <div className="border-b border-white/10 px-5 py-5">
+          <div className="mb-4 flex items-center justify-between md:hidden">
+            <span className="text-xs uppercase tracking-[0.35em] text-slate-400">
+              Pilarsa
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5"
+            >
+              <X size={18} />
             </button>
           </div>
 
-          {/* Logo (visible solo en desktop) */}
-          <div className="hidden md:flex items-center text-2xl font-bold mb-6 space-x-2">
-            <Image src="/logoVarios/logoPilarsa.png" alt="Logo" width={42} height={30} />
-            <span>Pilarsa Admin</span>
-          </div>
+          <Link
+            href="/admin"
+            className="flex items-center gap-3"
+            onClick={() => setOpen(false)}
+          >
+            <div className="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10">
+              <Image
+                src="/logoVarios/logoPilarsa.png"
+                alt="Pilarsa"
+                width={42}
+                height={42}
+              />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-cyan-300/80">
+                Control Center
+              </p>
+              <p className="text-lg font-semibold">Pilarsa Admin</p>
+            </div>
+          </Link>
 
-          {/* STOCK */}
-          <div className="mb-6">
-            <h3 className="text-sm uppercase font-semibold text-gray-400 mb-2">STOCK</h3>
-            <nav className="space-y-1">
-              <SidebarLink href="/admin/agregarAutoUsado" label="Agregar Auto Usado" onClick={closeSidebar} />
-              <SidebarLink href="/admin/eliminarAutoUsado" label="Eliminar Auto Usado" onClick={closeSidebar} />
-              <SidebarLink href="/admin/modificarAutoUsado" label="Modificar Auto Usado" onClick={closeSidebar} />
-            </nav>
-          </div>
-
-          <div className="border-t border-gray-600 my-4"></div>
-
-          {/* SERVICES */}
-          <div className="mb-6">
-            <h3 className="text-sm uppercase font-semibold text-gray-400 mb-2">SERVICES</h3>
-            <nav className="space-y-1">
-              <SidebarLink href="/admin/agregarServicios" label="Agregar Services" onClick={closeSidebar} />
-              <SidebarLink href="/admin/listarYmodificarServicies" label="Modificar Services" onClick={closeSidebar} />
-              <SidebarLink href="/admin/agregarVehiculoServicies" label="Agregar Vehículo" onClick={closeSidebar} />
-              <SidebarLink href="/admin/modificarVehiculo" label="Modificar Vehículo" onClick={closeSidebar} />
-              <SidebarLink href="/admin/repuestosGestion" label="Repuestos" onClick={closeSidebar} />
-            </nav>
-          </div>
-
-          <div className="border-t border-gray-600 my-4"></div>
-
-          {/* BALANCE */}
-          <div>
-            <h3 className="text-sm uppercase font-semibold text-gray-400 mb-2">BALANCE</h3>
-            <nav className="space-y-1">
-              <SidebarLink href="/admin/ventas" label="Ingreso (Ventas)" onClick={closeSidebar} />
-              <SidebarLink href="/admin/compras" label="Egreso (Compras)" onClick={closeSidebar} />
-              <SidebarLink href="/admin/balance" label="Balance" onClick={closeSidebar} />
-            </nav>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-400">
+              <ShieldCheck size={14} />
+              Sesion activa
+            </div>
+            <p className="text-sm font-semibold">Panel protegido</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Acceso controlado por NextAuth y middleware.
+            </p>
           </div>
         </div>
 
-        {/* Logout */}
-        <button
-          onClick={() => {
-            closeSidebar();
-            signOut({ callbackUrl: "/auth/login" });
-          }}
-          className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white p-2 rounded"
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:py-5">
+          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm text-cyan-100">
+            <LayoutDashboard size={16} />
+            Operacion diaria centralizada
+          </div>
+
+          <nav className="space-y-6">
+            {sections.map((section) => (
+              <div key={section.title}>
+                <p className="mb-2 px-2 text-xs uppercase tracking-[0.3em] text-slate-500">
+                  {section.title}
+                </p>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const active = pathname === item.href;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={cx(
+                          "group flex items-center justify-between rounded-2xl px-3 py-3 text-sm transition",
+                          active
+                            ? "bg-white text-slate-950 shadow-lg"
+                            : "text-slate-300 hover:bg-white/6 hover:text-white",
+                        )}
+                      >
+                        <span>{item.label}</span>
+                        <span
+                          className={cx(
+                            "h-2.5 w-2.5 rounded-full transition",
+                            active ? "bg-cyan-500" : "bg-slate-700 group-hover:bg-slate-500",
+                          )}
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+        </div>
+
+        <div className="border-t border-white/10 p-4">
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-400"
+          >
+            <LogOut size={16} />
+            Cerrar sesion
+          </button>
+        </div>
       </aside>
     </>
-  );
-}
-
-function SidebarLink({
-  href,
-  label,
-  onClick,
-}: {
-  href: string;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <Link href={href} className="block hover:bg-gray-700 p-2 rounded" onClick={onClick}>
-      {label}
-    </Link>
   );
 }

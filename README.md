@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pilarsa SRL
 
-## Getting Started
+Refactor integral de la web comercial y del panel administrativo sobre Next.js + Prisma.
 
-First, run the development server:
+## Que cambia en esta version
+
+- APIs con validacion centralizada y reglas compartidas.
+- Capa de dominio que desacopla el frontend del esquema heredado.
+- Operaciones criticas con transacciones para evitar inconsistencias.
+- Rediseño visual del sitio publico y del panel admin.
+- Workspaces operativos reutilizables para usados, services, vehiculos, repuestos y finanzas.
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de entorno minimas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL=postgresql://...
+NEXTAUTH_SECRET=...
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+RESEND_API_KEY=...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Base de datos nueva sin tocar la actual
 
-## Learn More
+Si necesitas levantar un entorno nuevo sin modificar la base existente:
 
-To learn more about Next.js, take a look at the following resources:
+1. Crea una nueva base PostgreSQL.
+2. Define `DATABASE_URL_FRESH` apuntando a esa base.
+3. Usa el esquema alternativo:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx prisma db push --schema prisma/schema.fresh.prisma
+npx prisma generate --schema prisma/schema.fresh.prisma
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`schema.fresh.prisma` replica el modelo actual para inicializar otra base sin tocar `prisma/schema.prisma`.
 
-## Deploy on Vercel
+## Estructura recomendada
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `lib/core`: errores, HTTP y compatibilidad con campos heredados.
+- `lib/domain`: contratos, validaciones y serializadores.
+- `lib/server/modules`: reglas de negocio por recurso.
+- `components/admin/workspaces`: flujos operativos reutilizables del panel.
+- `lib/api`: cliente tipado para frontend.
